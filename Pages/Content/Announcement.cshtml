@@ -1,0 +1,13 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.AnnouncementModel
+@{
+    ViewData["Title"] = Model.InspectedAnnouncement.Baslik;
+
+    <div class="page-main-container">
+        <div class="slick-container">
+            <div class="header-30 border-bottom">@Model.InspectedAnnouncement.Baslik</div>
+            <div style="height:10px;"></div>
+            @Html.Raw(Model.InspectedAnnouncement.Icerik)
+        </div>
+    </div>
+}

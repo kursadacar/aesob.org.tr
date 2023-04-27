@@ -1,0 +1,56 @@
+﻿@page
+@model aesob.org.tr.Pages.LoginModel
+@{
+    var curUser = ViewData["LoggedInUser"] as aesob.org.tr.Models.User;
+    if(curUser != null)
+    {
+        RedirectToPage("/Index");
+    }
+
+    <div class="slick-container w-100">
+        <form id="login-form" method="post" class="d-flex flex-column justify-content-center align-items-center" style="margin:0 auto; max-width:500px;">
+            <label for="username" class="input-label-big align-text-center">Kullanıcı Adı</label>
+            <input id="username" name="username" class="input-field-big" type="text" />
+            <label for="password" class="input-label-big align-text-center">Şifre</label>
+            <input id="password" name="password" class="input-field-big" type="password" />
+            <button type="button" class="slick-button" onclick="login()">Giriş Yap</button>
+        </form>
+    </div>
+
+    <script>
+        $("form").find('input').keypress(function (e) {
+            // Enter pressed?
+            if (e.which == 10 || e.which == 13) {
+                $('form').find('button').click();
+            }
+        });
+
+        function login() {
+            $.ajax(
+                {
+                    type: 'post',
+                    url: '/Login?handler=Login',
+                    data: $("#login-form").serialize(),
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    success: function (result) {
+                        if (result == "success") {
+                            swal.fire('Giriş Başarılı', '', 'success').then(function (result) {
+                                if (result.isConfirmed) {
+                                    window.location.href = "/Index";
+                                }
+                            });
+                        }
+                        else {
+                            swal.fire('Giriş Başarısız', 'Hatalı kullanıcı adı ya da şifre!', 'error');
+                        }
+                    },
+                    error: function (a, b, c) {
+                        console.log(a);
+                        console.log(b);
+                        console.log(c);
+                    }
+                }
+            );
+        }
+    </script>
+}

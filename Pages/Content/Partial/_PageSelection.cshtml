@@ -1,0 +1,65 @@
+﻿@model aesob.org.tr.Pages.Content.Base.INavigablePage
+@{
+    <div class="d-flex flex-row flex-wrap justify-content-center align-items-start w-100" style="margin: 5px 0px;">
+        @{
+            if (Model.MaxPages != 1)
+            {
+                bool cutExtraPages = Model.MaxPages > 8;
+
+                int cutMinLowerPage = Model.CurrentPageIndex - 2;
+                int cutMaxLowerPage = Model.CurrentPageIndex + 3;
+                int cutMinHigherPage = Model.MaxPages - 1;
+
+                for (int i = 0; i < Model.MaxPages; i++)
+                {
+                    if (cutExtraPages)
+                    {
+                        if (i == 1 && cutMinLowerPage > 1)
+                        {
+                            <div>...</div>
+                            i = cutMinLowerPage - 1;
+                            continue;
+                        }
+                        else if (i == cutMaxLowerPage && cutMaxLowerPage < cutMinHigherPage)
+                        {
+                            <div>...</div>
+                            i = cutMinHigherPage - 1;
+                            continue;
+                        }
+                    }
+
+                    string activeText = i == Model.CurrentPageIndex ? "active disabled text-white" : "";
+
+                    <div style="min-width: 20px; min-height: 20px; margin: 4px 4px;">
+                        <a href="~/@Model.ContentPageName?@Model.ContentParameterName=@i" class="block-link text-black border-1 border-radius-3 p-0 @activeText">@(i+1)</a>
+                    </div>
+                }
+
+                if (cutExtraPages)
+                {
+                    <div style="min-height:24px; margin:0px 4px; width:1px; background-color:grey; align-self:center"></div>
+                    <select onchange="jumpToPage(this);" style="width:45px; height: 24px; margin: 4px 4px;" class="text-black border-1 border-radius-3 p-0">
+                        @for (int i = 0; i < Model.MaxPages; i++)
+                        {
+                            var selectedText = Model.CurrentPageIndex == i ? "selected" : "";
+                            if (Model.CurrentPageIndex == i)
+                            {
+                                <option value="@i" selected>@(i+1)</option>
+                            }
+                            else
+                            {
+                                <option value="@i">@(i+1)</option>
+                            }
+                        }
+                    </select>
+                }
+            }
+        }
+    </div>
+
+    <script>
+        function jumpToPage(selectElement) {
+            location.href = '@Href($"~/{Model.ContentPageName}?{Model.ContentParameterName}=")' + selectElement.selectedIndex;
+        }
+    </script>
+}

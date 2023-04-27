@@ -1,0 +1,51 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.CircularsModel
+@{
+    Layout = Utilities.NavigationHelper.ContentLayoutPath;
+
+    async Task RenderYearSection()
+    {
+    <div class="d-flex flex-row flex-wrap justify-content-center align-items-start w-100" style="margin: 5px 0px;">
+        @{
+            if (Model.AvailableYears.Count != 0)
+            {
+                for (int i = Model.AvailableYears.Count - 1; i >= 0; i--)
+                {
+                    int year = Model.AvailableYears[i];
+                    string activeText = year == Model.CurYear ? "active disabled text-white" : "";
+
+                    <div style="height: 20px; margin: 0px 4px;">
+                        <a href="~/Content/Circulars?year=@year" class="block-link text-black border-1 border-radius-3 @activeText" style="padding:0px 3px;">@year</a>
+                    </div>
+                }
+            }
+        }
+    </div>
+    }
+
+    await RenderYearSection();
+
+    <table class="table-bordered w-100" style="margin:35px 0px;">
+        <thead>
+            <tr>
+                <th class="blue-background text-white" style="padding:3px;">Sayı</th>
+                <th class="blue-background text-white" style="padding:3px;">Konu</th>
+                <th class="blue-background text-white" style="padding:3px;">Tarih</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var circular in Model.Circulars)
+                {
+                    <tr>
+                        <td style="padding:3px; font-size:14px;">@circular.Sayi</td>
+                        <td style="padding:3px;"><a target="_blank" href="~/images/Genelgeler/@circular.Yolu">@circular.Konu</a></td>
+                        <td style="padding:3px; font-size:14px;">@circular.Tarih.Value.ToCulturalString()</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    await RenderYearSection();
+}

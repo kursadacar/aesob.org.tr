@@ -1,0 +1,41 @@
+﻿@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <div class="d-flex flex-row justify-content-center align-items-start w-100 ml-5 mr-5">
+        <div class="slick-container" style="min-width:200px;">
+            @{
+                var currentPage = new NavigationHelper.NavBarPage();
+                var currentCategory = new NavigationHelper.NavBarCategory();
+
+                if (!(ViewBag.CurrentCategory is null) && !(ViewBag.CurrentPage is null))
+                {
+                    currentCategory = (aesob.org.tr.Utilities.NavigationHelper.NavBarCategory)ViewBag.CurrentCategory;
+                    currentPage = (aesob.org.tr.Utilities.NavigationHelper.NavBarPage)ViewBag.CurrentPage;
+
+                    <div class="header-24 padding-8 border-bottom">@currentCategory.Header</div>
+                    @foreach (var navigation in currentCategory.Items.Where(x => !x.HiddenInLayout))
+                    {
+                        var activeText = currentPage.Title == navigation.Title ? "active" : "";
+                        <a class="block-link-dark padding-8 @activeText" style="text-align:left" href="@Href("~/" + navigation.URL)">
+                            <i class="fas fa-angle-right" style="color:#252525; pointer-events:none"></i>
+                            @navigation.Title
+                        </a>
+                    }
+                }
+            }
+        </div>
+        <div class="slick-container mr-5">
+            <div class="header-30 m-auto">@currentPage.Title</div>
+            @RenderBody()
+        </div>
+    </div>
+</body>
+</html>

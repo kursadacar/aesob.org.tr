@@ -1,0 +1,43 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.DealsModel
+@{
+    Layout = Utilities.NavigationHelper.ContentLayoutPath;
+    foreach (var deal in Model.Deals)
+    {
+        <div class="w-100 deal-bg">
+            <table class="table-bordered w-100" style="margin:10px 0px;">
+                <thead>
+                    <tr>
+                        <th class="blue-background text-white" colspan="2" style="padding:5px">@deal.Taraf</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="width: 110px; padding: 3px;">Başlama Tarihi</td>
+                        <td style="padding:3px;">@CompatibilityHelper.GetDateTimeCompatible(deal.Bastarihi).ToCulturalString()</td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 110px; padding: 3px;">Bitiş Tarihi</td>
+                        <td style="padding:3px;">@CompatibilityHelper.GetDateTimeCompatible(deal.Bittarihi).ToCulturalString()</td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 110px; padding: 3px;">İçerik</td>
+                        <td style="padding:3px;">@Html.Raw(deal.Icerik)</td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 110px; padding: 3px;">Firma Adresi</td>
+                        <td style="padding:3px;">@deal.Tarafadres</td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 110px; padding: 3px;">Firma Tel.</td>
+                        <td style="padding:3px;">@deal.Taraftelefon</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+}

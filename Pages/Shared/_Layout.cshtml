@@ -1,0 +1,309 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AESOB</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/aesob.css" />
+    <link rel="stylesheet" href="~/css/aesobDark.css" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/all.css" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="~/lib/trumbowyg/dist/ui/trumbowyg.min.css" />
+    <script src="~/lib/trumbowyg/dist/trumbowyg.min.js"></script>
+    <script src="~/lib/trumbowyg/dist/langs/tr.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/cookies/js.cookie.js"></script>
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+    <script src="~/lib/trumbowyg/dist/plugins/fontfamily/trumbowyg.fontfamily.min.js"></script>
+    <script src="~/lib/trumbowyg/dist/plugins/uploadfile/trumbowyg.uploadfile.js"></script>
+    <script src="~/lib/trumbowyg/dist/plugins/upload/trumbowyg.upload.min.js"></script>
+
+</head>
+<body class="bg-aesob-grayish-white">
+    <img class="w-100 banner-blur hidden-responsive" style="margin-top: -70px !important; margin-bottom:-30px !important;" src="~/images/front-page-banner.png" />
+
+    <header class="w-100" style="position: relative; max-width: 1360px; margin: auto;">
+        <div class="d-flex flex-row hidden-responsive flex-wrap align-items-start-responsive justify-content-center align-items-end">
+            @{
+                async Task RenderCustomNav(NavigationHelper.NavBarCategory element, bool singleLink)
+                {
+                    @if (singleLink)
+                    {
+                        <a class="slick-button bg-info nav-bar-element text-black" href="@Href("~/" + element.Items.FirstOrDefault().URL)" );">@element.Header</a>
+                    }
+                    else
+                    {
+                        <div class="nav-bar-dropdown-parent">
+                            <div class="text-black" style="user-select: none;">@element.Header <div class="nav-bar-dropdown-triangle"><i class="fa fa-caret-down"></i></div></div>
+                            <div class="nav-bar-dropdown-container">
+                                @foreach (var item in element.Items)
+                                {
+                                    var url = Url.Content("~/" + item.URL);
+                                    <a class="block-link text-black w-100" href="@Href("~/" + item.URL)">@item.Title</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+
+                async Task RenderNavBarPage(NavigationHelper.NavBarCategory element)
+                {
+                    <div class="nav-bar-dropdown-parent">
+                        <div class="text-black" style="user-select: none;">@element.Header <div class="nav-bar-dropdown-triangle"><i class="fa fa-caret-down"></i></div></div>
+                        <div class="nav-bar-dropdown-container">
+                            @foreach (var item in element.Items)
+                            {
+                                var url = Url.Content("~/" + item.URL);
+                                <a class="block-link w-100 text-black" href="@Href("~/" + item.URL)">@item.Title</a>
+                            }
+                        </div>
+                    </div>
+                }
+
+                async Task RenderCustomNavMobile(NavigationHelper.NavBarCategory element, bool singleLink)
+                {
+                    @if (singleLink)
+                    {
+                        <a class="slick-button bg-info nav-bar-element" href="@Href("~/" + element.Items.FirstOrDefault().URL)" );">@element.Header</a>
+                    }
+                    else
+                    {
+                        <div class="nav-bar-dropdown-parent">
+                            <div style="user-select: none; font-size: 22px;">@element.Header <div class="nav-bar-dropdown-triangle"><i class="fa fa-caret-down"></i></div></div>
+                            <div class="nav-bar-dropdown-container">
+                                @foreach (var item in element.Items)
+                                {
+                                    var url = Url.Content("~/" + item.URL);
+                                    <a class="block-link w-100" style="font-size: 22px;" href="@Href("~/" + item.URL)">@item.Title</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+
+                async Task RenderNavBarPageMobile(NavigationHelper.NavBarCategory element)
+                {
+                    <div class="nav-bar-dropdown-parent">
+                        <div style="user-select: none; font-size:22px;">@element.Header <div class="nav-bar-dropdown-triangle"><i class="fa fa-caret-down"></i></div></div>
+                        <div class="nav-bar-dropdown-container">
+                            @foreach (var item in element.Items)
+                            {
+                                var url = Url.Content("~/" + item.URL);
+                                <a class="block-link w-100" style="font-size: 22px;" href="@Href("~/" + item.URL)">@item.Title</a>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="hidden-responsive" style="margin-top:10px;">
+                    <a href="~/Index">
+                        <img id="logo-responsive" class="img-cover" type="image" style="width: 250px; cursor:pointer;" src="~/images/aesob_logo.png" />
+                    </a>
+                </div>
+
+
+                var navBarElements = Utilities.NavigationHelper.NavBarElements.Where(x => !x.DoNotAutoList);
+                if (navBarElements != null)
+                {
+                    foreach (var element in navBarElements)
+                    {
+                        await RenderNavBarPage(element);
+                    }
+                }
+
+                var loggedInObj = ViewData["HasLoggedIn"];
+                if (loggedInObj is bool loggedIn && loggedIn)
+                {
+                    await RenderCustomNav(NavigationHelper.AdminCategory, false);
+                }
+                else if (ViewBag.IsDevelopment != null && (bool)ViewBag.IsDevelopment)
+                {
+                    await RenderCustomNav(NavigationHelper.LoginCategory, true);
+                }
+            }
+        </div>
+        @* Mobile Nav-Bar *@
+        <div class="show-responsive">
+            <div class="d-flex flex-row flex-nowrap justify-content-between align-items-center pl-4 pr-4">
+                <a href="~/Index">
+                    <img id="logo-normal" class="img-cover" type="image" style="cursor: pointer; width: 280px;" src="~/images/aesob_logo.png" />
+                </a>
+                <div>
+                    <div onclick="toggleMobileNavbar()" style="text-align:right;">
+                        <i class="fa fa-bars text-black font-size-40px"></i>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-nav-container" class="nav-bar-dropdown-parent-mobile bg-aesob-whiteish-gray d-flex flex-column justify-content-start align-items-center text-black">
+                @{
+                    <div class="text-black dark-mode-button mobile" style="position:static !important;" id="mode-switch-button" onclick="switchMode()"><i class="fa fa-moon"></i></div>
+                    if (navBarElements != null)
+                    {
+                        foreach (var element in navBarElements)
+                        {
+                            await RenderNavBarPageMobile(element);
+                        }
+                    }
+
+                    if (loggedInObj is bool m_loggedIn && m_loggedIn)
+                    {
+                        await RenderCustomNavMobile(NavigationHelper.AdminCategory, false);
+                    }
+                    else if (ViewBag.IsDevelopment != null && (bool)ViewBag.IsDevelopment)
+                    {
+                        await RenderCustomNavMobile(NavigationHelper.LoginCategory, true);
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="text-black dark-mode-button hidden-responsive" id="mode-switch-button" onclick="switchMode()"><i class="fa fa-moon"></i></div>
+
+    </header>
+
+    <div class="d-flex flex-column justify-content-center align-items-start margin-20 full-width-responsive no-margin-responsive">
+        @RenderBody()
+        <a id="aesob-phone-button" class="d-block aesob-phone-button" href="tel:+90 242 334 56 56">
+            <div class="aesob-phone-button-background"></div>
+            <i class="fas fa-phone" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0; font-size: 37px; line-height: 65px; text-align: center;"></i>
+            <label class="aesob-phone-button-content">Bize Ulaşın!</label>
+        </a>
+    </div>
+
+    @* Footer *@
+    <div class="border-top aesob-footer text-muted">
+        <div class="container aesob-footer-content">
+            Copyright © @{
+                var year = DateTime.Now.Year;
+                var yearText = year > 2021 ? $"2021 - {year.ToString()}" : $"2021";
+                @yearText;
+            } | Antalya Esnaf ve Sanatkarlar Odaları Birliği <br />
+            Fabrikalar Mahallesi Hasan Tahsin Caddesi No:33 Kepez/ANTALYA <br />
+            Telefon: <a class="text-link" href="tel:+90 242 334 56 56">+90 242 334 56 56</a> | Faks: <a class="text-link" href="tel:+90 242 334 56 59">+90 242 334 56 59</a> <br />
+            E-Posta: <a class="text-link" href="email:aesob@aesob.org.tr">aesob@aesob.org.tr</a> <br />
+            Kep Adresi: <a class="text-link" href="/antalyaesnafvesanatkarlarodalaribirligi@hs01.kep.tr">antalyaesnafvesanatkarlarodalaribirligi@hs01.kep.tr</a> <br />
+        </div>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+<script type="text/javascript">
+    document.addEventListener('click', function (e) {
+        if (document.activeElement.toString() == '[object HTMLButtonElement]') {
+            document.activeElement.blur();
+        }
+    });
+
+    function isMobile() {
+        return $(".hidden-responsive").css("display") == "none";
+    }
+
+    $(".nav-bar-dropdown-parent").on("click", function (e) {
+        let elem = $(e.currentTarget);
+        if (!elem.hasClass("active")) {
+            elem.addClass("active");
+        }
+        else {
+            elem.removeClass("active");
+        }
+    });
+    $(".nav-bar-dropdown-parent").mouseenter(function (e) {
+        if (!isMobile()) {
+            let elem = $(e.currentTarget);
+            if (!elem.hasClass("active")) {
+                elem.addClass("active");
+            }
+        }
+    }).mouseleave(function (e) {
+        let elem = $(e.currentTarget);
+        if (elem.hasClass("active")) {
+            elem.removeClass("active");
+        }
+    });
+
+    $(document).on("click", function (event) {
+        if (!$(event.target).closest(".nav-bar-dropdown-parent").length) {
+            $(".nav-bar-dropdown-parent").removeClass("active");
+        }
+    });
+
+    $(document).ready(function () {
+        let elem = $("#mobile-nav-container");
+
+        elem.data("original-height", elem.height());
+        elem.data("enabled", false);
+        elem.css("height", "0px");
+    });
+
+    function toggleMobileNavbar() {
+        let elem = $("#mobile-nav-container");
+
+        console.log(elem.data("enabled"));
+
+        if (elem.data("enabled") == "true") {
+            elem.css("height", "0");
+            elem.data("enabled", "false");
+        }
+        else {
+            let height = 0;
+            for (let i = 0; i < elem.get(0).children.length; i++) {
+                height += elem.get(0).children[i].clientHeight;
+            }
+            elem.css("height", height + "px");
+            elem.data("enabled", "true");
+        }
+    }
+
+    function goToHomePage() {
+        console.log("go to home page...");
+        window.location.href = "/Index";
+    }
+
+    window.onscroll = function () {
+        var limit = Math.max(document.body.scrollHeight, document.body.offsetHeight,
+            document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight) - window.innerHeight;
+        var currentScrollPos = window.pageYOffset;
+        //console.log(`Limit: ${limit} Cur: ${currentScrollPos}`);
+        if (limit - 50 > currentScrollPos) {
+            document.getElementById("aesob-phone-button").style.bottom = "20px";
+            document.getElementById("aesob-phone-button").style.left = "20px";
+        } else {
+            document.getElementById("aesob-phone-button").style.bottom = "-25px";
+            document.getElementById("aesob-phone-button").style.left = "-25px";
+        }
+    }
+
+    //Mode Switch -- Begin
+    function switchMode() {
+        Cookies.set("darkMode", Cookies.get("darkMode") == "true" ? "false" : "true");
+        setMode();
+    }
+
+    function setMode() {
+        let isDark = !(Cookies.get("darkMode") == "true");
+        if (isDark) {
+            $("*").not(".custom-dark-policy").removeClass("dark");
+            $("#logo-responsive").attr("src",'@Url.Content("~/images/aesob_logo.png")');
+            $("#logo-normal").attr("src",'@Url.Content("~/images/aesob_logo.png")');
+        }
+        else {
+            $("*").not(".custom-dark-policy").addClass("dark");
+            $("#logo-responsive").attr("src",'@Url.Content("~/images/logo-alt.png")');
+            $("#logo-normal").attr("src",'@Url.Content("~/images/logo-alt.png")');
+        }
+    }
+
+    setMode();
+    //Mode Switch -- End
+</script>

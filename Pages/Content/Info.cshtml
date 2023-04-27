@@ -1,0 +1,9 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.InfoModel
+@using aesob.org.tr.Utilities
+@{
+    Layout = NavigationHelper.ContentLayoutPath;
+    ViewBag.ContentModel = Model;
+
+    @Html.Raw(Model.PageContent);
+}

@@ -1,0 +1,11 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.BoardModel
+@{
+    Layout = NavigationHelper.ContentLayoutPath;
+
+    <div class="page-main-container">
+        <div class="slick-container">
+            <div class="header-30 padding-8">@aesob.org.tr.CustomModels.BoardData.All.FirstOrDefault(x => x.ID == Model.BoardID).Name</div>
+        </div>
+    </div>
+}

@@ -1,0 +1,506 @@
+﻿@model IAdminModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnv;
+
+<div id="admin-buttons-panel" class="d-flex flex-row justify-content-center align-items-center position-sticky" style="top: 0; z-index: 2; border-radius: 7px; background-color: #f2f2f2; padding:10px 0px;">
+    <form method="post" id="add-file-generic-form">
+        <div class="slick-button block-link-dark bg-aesob-orange" onclick="selectFromFiles('/images/uploads/', 'noid', '')" style="cursor:pointer">
+            <input hidden name="UploadedFile" id="add-file-generic-input" type="file" />
+            <span class="text-white">Dosya Yükle</span>
+        </div>
+    </form>
+    <div class="d-flex flex-lg-row justify-content-end align-items-center slick-inner-container mr-2">
+        <input class="input-field-big" id="search-input" type="text" placeholder="Arama..." value="@Model.CurrentQuery" />
+        <div class="block-link-dark bg-aesob-blue-light text-white" onclick="filterBy()">Ara</div>
+    </div>
+    <div id="data-edit-toggle-button" data-is-deactivated="false" class="slick-button bg-info block-link-dark text-white align-text-center admin-button" style="" onclick="toggleEdit();">Düzenle</div>
+    <div id="data-add-new-button" class="slick-button bg-aesob-blue-light block-link-dark text-white align-text-center admin-button" style="max-width:120px; height:40px; margin-right:5px;" onclick="createNew();">Yeni Ekle</div>
+    <div id="data-save-button" class="slick-button bg-aesob-green block-link-dark text-white align-text-center admin-button" onclick="saveChanges();">Kaydet</div>
+    <div id="data-cancel-button" class="slick-button bg-danger block-link-dark text-white align-text-center admin-button" onclick="cancelChanges();">İptal</div>
+</div>
+
+@Html.PartialAsync("Content/Partial/_PageSelection", Model).Result
+
+<form id="data-edit-form" method="post" class="d-flex flex-row flex-wrap justify-content-center align-items-stretch w-100">
+    @{
+        if (Model.ItemList != null && Model.ItemList.Count > 0)
+        {
+            for (int i = 0; i < Model.ItemList.Count; i++)
+            {
+                @await Html.PartialAsync("Admin/_Base/_AdminEditorItem", new Tuple<aesob.org.tr.Models.IAesobEntity, int>((aesob.org.tr.Models.IAesobEntity)Model.ItemList[i], i))
+            }
+        }
+        else
+        {
+            <div>
+                Sonuç Bulunamadı...
+            </div>
+        }
+    }
+</form>
+
+@Html.PartialAsync("Content/Partial/_PageSelection", Model).Result
+
+<div id="add-item-modal-jq" class="modal" style="position:relative; overflow:initial; min-width:550px; padding:10px;">
+    <form id="new-item-form" style="overflow: auto; max-height:100%;" method="post">
+        @await Html.PartialAsync("Admin/_Base/_AdminEditorItem", new Tuple<aesob.org.tr.Models.IAesobEntity, int>((aesob.org.tr.Models.IAesobEntity)Model.NewItem, -1))
+        <input hidden asp-for="AvailableEntityID" value="@Model.AvailableEntityID" />
+        <button type="button" class="slick-button bg-info text-white" onclick="addNew()">Yeni Ekle</button>
+    </form>
+</div>
+
+<script>
+    function filterBy() {
+        window.location.href = '@Context.Request.Path?query=' + $('#search-input').val() + '&searchIndex=0';
+    }
+
+    function createNew() {
+        if (!isEditingDataForms) {
+            toggleEdit();
+        }
+
+        $("#add-item-modal-jq").modal({
+            fadeDuration: 220,
+        });
+
+        $(".jquery-modal").css("z-index", "20");
+    }
+
+    function updateImagePreview(srcElement, index, directory) {
+        if (directory[directory.length - 1] == '/' || directory[directory.length - 1] == '\\') {
+            directory = directory.slice(0, -1);
+        }
+        let usedDir = "/images/" + directory + "/" + srcElement.value;
+        $("#image-preview-" + index).attr("src", usedDir);
+        //console.log("Update image preview: " + srcElement.id);
+    }
+
+    function updateYoutubeImagePreview(srcElement, index) {
+        $("#youtube-image-preview-" + index).attr("src", "https://img.youtube.com/vi/" + srcElement.value + "/1.jpg");
+    }
+
+    function updateSelectFilesFilter() {
+        let modalContainer = $("#file-selection-modal-item-container");
+        let items = modalContainer.children();
+        modalContainer.addClass("hidden");
+
+        let query = $("#file-selection-search-input").val();
+
+        for (let i = 0; i < items.length; i++) {
+            let itemChildren = $(items[i]).children();
+            items[i].classList.add("hidden");
+
+            for (let itemChildIndex = 0; itemChildIndex < itemChildren.length; itemChildIndex++) {
+                if (itemChildren[itemChildIndex].innerText != null && itemChildren[itemChildIndex].innerText.includes(query)) {
+                    items[i].classList.remove("hidden");
+                    break;
+                }
+            }
+        }
+
+        modalContainer.removeClass("hidden");
+    }
+
+    function selectFromFiles(fileDir, inputElementID, typeFilter) {
+
+        let fileNames = [];
+
+        let modalContainer = document.createElement("div");
+        let addButton = document.createElement("div");
+        let searchBox = document.createElement("input");
+        let addFileForm = document.createElement("form");
+        let addFileFormInput = document.createElement("input");
+        let modal = document.createElement("div");
+        let searchBoxContainer = document.createElement("div");
+        let upperPanelContainer = document.createElement("div");
+
+        function createAlert() {
+
+            upperPanelContainer.id = "file-selection-upper-panel-container";
+            upperPanelContainer.className = "d-flex flex-row justify-content-between align-items-center";
+            modalContainer.appendChild(upperPanelContainer);
+
+            addFileFormInput.type = "file";
+            addFileFormInput.hidden = true;
+            addFileFormInput.name = "UploadedFile";
+            addFileFormInput.id = "UploadedFile";
+
+            addFileForm.method = "post";
+            addFileForm.appendChild(addFileFormInput);
+
+            addButton.className = "bg-aesob-blue-light text-white";
+            addButton.style.maxWidth = "140px";
+            addButton.style.cursor = "pointer";
+            addButton.style.padding = "5px";
+            addButton.innerText = "Yeni Dosya Ekle";
+            addButton.id = "file-selection-add-new-button";
+            addButton.appendChild(addFileForm);
+            upperPanelContainer.appendChild(addButton);
+
+            searchBoxContainer.id = "file-selection-search-box-container";
+            searchBoxContainer.className = "d-flex flex-row justify-content-start align-items-center";
+            upperPanelContainer.appendChild(searchBoxContainer);
+
+            let searchBoxLabel = document.createElement("label");
+            searchBoxLabel.innerText = "Arama:";
+            searchBoxLabel.className = "font-bold m-0 ml-1";
+            searchBoxContainer.appendChild(searchBoxLabel);
+
+            searchBox.type = "text";
+            searchBox.id = "file-selection-search-input";
+            searchBox.className = "input-field-big";
+            searchBox.setAttribute("oninput", "updateSelectFilesFilter()");
+            searchBoxContainer.appendChild(searchBox);
+
+            modal.className = "d-flex flex-row flex-wrap justify-content-start align-items-start";
+            modal.id = "file-selection-modal-item-container";
+            modal.style.height = "600px";
+            modal.style.overflow = "auto";
+
+            //console.log("Picking from fileNames:");
+            //console.log(fileNames);
+
+            for (let i = 0; i < fileNames.length; i++) {
+                let mainContainer = document.createElement("div");
+                mainContainer.className = "w-100";
+                mainContainer.style.margin = "3px 0px 3px 0px";
+                mainContainer.style.backgroundColor = "#eaeaea";
+                mainContainer.style.border = "1px solid black";
+
+                let tuple = document.createElement("div");
+                tuple.className = "d-flex flex-row justify-content-start align-items-center w-100";
+                if (inputElementID != "noid") {
+                    tuple.className += " hover-shrink hover-darken";
+                }
+                tuple.style.padding = "5px";
+                tuple.style.height = "120px";
+                tuple.setAttribute("data-file-name-index", i);
+                tuple.id = "file-selection-container-" + i;
+                mainContainer.appendChild(tuple);
+
+                let buttonContainer = document.createElement("div");
+                buttonContainer.className = "d-flex flex-row justify-content-start align-items-center w-100";
+                if (inputElementID != "noid") {
+                    buttonContainer.style.cursor = "pointer";
+                }
+                buttonContainer.style.padding = "5px";
+                buttonContainer.style.height = "120px";
+                buttonContainer.setAttribute("data-file-name-index", i);
+                buttonContainer.id = "file-selection-button-container-" + i;
+                tuple.appendChild(buttonContainer);
+
+                let image = document.createElement("img");
+                image.setAttribute("onerror", "this.src=\"/images/image-not-found.jpg\"");
+                image.className = "img-cover";
+                image.style.maxHeight = "100px";
+                image.style.maxWidth = "100px";
+                image.src = fileDir + fileNames[i];
+                buttonContainer.appendChild(image);
+
+                let label = document.createElement("label");
+                label.className = "input-label-big";
+                label.innerText = fileNames[i];
+                buttonContainer.appendChild(label);
+
+                //Copying url
+                {
+                    let urlCopyContainer = document.createElement("div");
+                    urlCopyContainer.className = "d-flex flex-row justify-content-center align-items-center w-100 pb-2";
+                    urlCopyContainer.style.width = "250px";
+                    mainContainer.appendChild(urlCopyContainer);
+
+                    let urlText = document.createElement("div");
+                    urlText.innerText = image.src;
+                    urlCopyContainer.appendChild(urlText);
+
+                    let copyUrlButton = document.createElement("div");
+                    copyUrlButton.className = "slick-button bg-aesob-blue-light text-white hover-shrink ml-2";
+                    copyUrlButton.innerText = "Link Kopyala";
+                    copyUrlButton.setAttribute("data-url", image.src);
+                    copyUrlButton.id = "copy-url-button-" + i;
+                    urlCopyContainer.appendChild(copyUrlButton);
+                }
+
+                modal.appendChild(mainContainer);
+            }
+            modalContainer.appendChild(modal);
+
+            Swal.fire({
+                title: 'Dosya Seçimi',
+                width: 900,
+                html: $(modalContainer).html(),
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Kaydet',
+                cancelButtonText:
+                    'İptal',
+            }).then((result) => {
+
+            });
+        }
+
+        function addCallbacks() {
+            $("[id^=copy-url-button]").on("click", function () {
+                let url = $(this).attr("data-url");
+                navigator.clipboard.writeText(url);
+                alert("Kopyalandı:  " + url);
+                //console.log("Copying URL: " + url);
+            });
+
+            if (inputElementID != "noid") {
+                $("[id^=file-selection-button-container]").on("click", function () {//Select the file
+                    let inputElement = $("#" + inputElementID);
+                    let nameIndex = $(this).attr("data-file-name-index");
+                    inputElement.val(fileNames[nameIndex]);
+                    inputElement.trigger('input');
+                });
+            }
+
+            $("#file-selection-add-new-button").on("click", function () {//Add a new file
+                $(addFileFormInput).trigger("click");
+            });
+
+            $(addFileFormInput).on('change', function () {
+                let formData = new FormData($(addFileForm)[0]);
+                console.log(formData);
+                formData.append("directory", '@_webHostEnv.WebRootPath.Replace('\\', '/')' + fileDir);
+                formData.append("acceptedTypes", typeFilter);
+
+                $.ajax({
+                    url: '@Context.Request.Path?handler=AddNewFile',
+                    method: 'post',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    success: function (result) {
+                        //console.log(result);
+                        if (result.startsWith("error")) {
+                            Swal.fire("Başarısız", "Dosya yüklenirken bir hata oluştu: " + result, "error");
+                        }
+                        else if (result == "wrong-type") {
+                            Swal.fire("Başarısız", "Yüklemek istediğiniz dosya tipi bu işlem için geçerli değil");
+                        }
+                        else {
+                            Swal.fire("Başarılı", "Dosya başarı ile yüklendi", "success").then(() => {
+                                let inputElement = $("#" + inputElementID);
+                                inputElement.val(result);
+                                inputElement.trigger('input');
+                            })
+                        }
+                    }
+                });
+            });
+        }
+
+        function collectDirectories() {
+            let directory = '@_webHostEnv.WebRootPath.Replace('\\', '/')/' + fileDir;
+            return $.ajax({
+                url: '@Context.Request.Path?handler=CollectFilesFromDirectory',
+                method: "get",
+                data: { directory: directory, filter: typeFilter },
+                headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                success: function (result) {
+                    if (result == "error") {
+                        alert("error while collecting directories");
+                    }
+                    fileNames = JSON.parse(result);
+                    createAlert();
+                    addCallbacks();
+                }
+            });
+        }
+
+        collectDirectories();
+    }
+
+    function resetModalVisibility() {
+        $("#add-item-modal-jq").css("display", "");
+        //console.log("reset modal visibility");
+    }
+
+    function toggleEdit() {
+        let button = $("#data-edit-toggle-button");
+
+        if (isEditingDataForms) {
+            $("[id^=data-form-area] :input").attr("disabled", true);
+            $("[id^=data-form-area] :button").attr("disabled", true);
+            $("[id^=data-form-area] .richText-editor").prop("contenteditable", false);
+            $("[id^=data-form-area-cover]").css("display", "");
+
+            button.text("Düzenle");
+            isEditingDataForms = false;
+        }
+        else {
+            $("[id^=data-form-area] :input").attr("disabled", false);
+            $("[id^=data-form-area] :button").attr("disabled", false);
+            $("[id^=data-form-area] .richText-editor").prop("contenteditable", true);
+            $("[id^=data-form-area-cover]").css("display", "none");
+
+            button.text("Düzenlemeyi Bitir");
+            isEditingDataForms = true;
+        }
+
+    }
+
+    function saveChanges() {
+        if (!isEditingDataForms) {
+            toggleEdit();
+        }
+
+        $.ajax({
+            url: '@Context.Request.Path?handler=SaveChanges',
+            type: 'post',
+            data: $("#data-edit-form").serialize(),
+            headers: {
+                "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (result) {
+                if (result == "success") {
+                    Swal.fire('Kaydedildi', 'Değişiklikleriniz başarı ile kaydedildi', 'success').then( function() {
+                        window.location.reload();
+                    });
+                }
+                else {
+                    Swal.fire('Hata', 'Değişiklikler kaydedilirken bir hata oluştu', 'error');
+                    console.log(result);
+                    console.log(JSON.parse(result));
+                }
+            }
+        });
+        toggleEdit();
+    }
+
+    function cancelChanges() {
+        Swal.fire({
+            title: 'İptal',
+            icon: 'info',
+            text: 'Değişiklikleri iptal etmek istediğinize emin misiniz?',
+            showCloseButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonText:
+                'Evet',
+            cancelButtonText:
+                'Vazgeç',
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                window.location = '@Context.Request.Path?pageIndex=0';
+            }
+            else {
+                Swal.close();
+            }
+        })
+    }
+
+    function addNew(succesCallback) {
+        let sendData = $("#new-item-form").serialize();
+        console.log(sendData);
+
+        $.ajax({
+            url: '@Context.Request.Path?handler=AddNew',
+            type: 'post',
+            data: sendData,
+            headers: {
+                "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (result) {
+                if (result == "success") {
+                    Swal.fire('Eklendi', 'Veritabanına ekleme başarı ile yapıldı', 'success').then(function () {
+                        window.location.reload();
+                    });
+                }
+                else if (result == "not-implemented") {
+                    Swal.fire('Başarısız', 'Bu özellik henüz kullanıma hazır değildir', 'info');
+                }
+                else {
+                    Swal.fire('Başarısız', 'Veritabanına ekleme yaparken bir hata oluştu', 'error');
+                }
+            }
+        });
+    }
+
+    function removeItem(entityID) {
+        Swal.fire({
+            title: 'Sil',
+            icon: 'info',
+            text: 'Bu öğeyi silmek istediğinize emin misiniz?',
+            width: 750,
+            showCloseButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonText:
+                'Sil',
+            cancelButtonText:
+                'İptal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removeAction(entityID, function (response) {
+                    if (response == "success") {
+                        Swal.fire('Silindi', 'Silme işlemi başarı ile gerçekleşti', 'success').then(function () {
+                            window.location.reload();
+                        });
+                    }
+                    else if (response == "not-implemented") {
+                        Swal.fire('Başarısız', 'Bu özellik henüz kullanıma hazır değildir', 'info');
+                    }
+                    else {
+                        Swal.fire('Başarısız', 'Silme işlemi yapılırken bir hata oluştu', 'error');
+                    }
+                });
+            }
+            else {
+                Swal.fire('İptal', 'Silme işlemi iptal edildi', 'info');
+            }
+        });
+    }
+
+    function removeAction(entityID, successCallback) {
+        let sendData = "DeletedItemID=" + entityID;
+
+        $.ajax({
+            url: '@Context.Request.Path?handler=RemoveItem',
+            type: 'post',
+            data: sendData,
+            headers: {
+                "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (result) {
+                successCallback(result);
+            }
+        });
+    }
+
+    $('textarea').trumbowyg({
+        lang: 'tr',
+        @*btns: [
+            ['fontfamily'],
+            ['upload'],
+            ['uploadfile'],
+        ],
+        plugins: {
+            fontfamily: {
+                fontList: [
+                    { name: 'Arial', family: 'Arial, Helvetica, sans-serif' },
+                    { name: 'Comic Sans', family: '\'Comic Sans MS\', Textile, cursive, sans-serif' },
+                    { name: 'Open Sans', family: '\'Open Sans\', sans-serif' }
+                ]
+            },
+            upload: {
+                serverPath: '@Context.Request.Path?handler=UploadGenericFile',
+                fileFieldName: 'UploadedFile',
+                urlPropertyName: 'data.link'
+            }
+        }*@
+    });
+
+    $("#add-item-modal-jq").css("display", "block !important");
+
+    var isEditingDataForms = false;
+
+    toggleEdit();
+    toggleEdit();
+
+    $('input').trigger('input');
+</script>

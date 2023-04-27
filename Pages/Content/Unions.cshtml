@@ -1,0 +1,73 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.UnionsModel
+@{
+    Layout = aesob.org.tr.Utilities.NavigationHelper.ContentLayoutPath;
+
+    <script>
+        function changeUnion(type) {
+            let unionID = document.getElementById('dropdown').value;
+            window.location.href = '@Href("~/Content/Unions")' + '?type=' + type + "&union=" + unionID;
+        }
+    </script>
+
+    if (Model.IsCentral || !Model.IsCentral)//Wtf
+    {
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            @{
+                aesob.org.tr.Models.Odalar selectedUnion = null;
+            }
+            <select class="slick-button" style="margin-bottom:20px; max-width:360px;" id="dropdown" onchange="changeUnion(@(Model.IsCentral ? 0 : 1))">
+                @foreach (var union in Model._context.Odalars.OrderBy(x=> x.OdaAdi).Where(x => x.Merkezilce == Model.IsCentral))
+                {
+                    if (union.Id == Model.UnionID)
+                    {
+                        selectedUnion = union;
+                        <option selected="selected" value="@union.Id">@union.OdaAdi</option>
+                    }
+                    else
+                    {
+                        <option value="@union.Id">@union.OdaAdi</option>
+                    }
+                }
+            </select>
+
+            <div class="d-flex flex-row flex-col-responsive">
+                <div class="d-flex flex-column justify-content-start align-items-center" style="margin:10px;">
+                    <img style="width:200px;" class="img-cover" src="~/images/Resimler/@selectedUnion?.BaskanResim" />
+                    <div class="font-weight-bold">Başkan</div>
+                    <div>@selectedUnion?.Baskan</div>
+                </div>
+                <div style="margin:10px;">
+                    <div class="d-flex flex-row flex-col-responsive border-top border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">Genel Sekreter:</div>
+                        <div>@selectedUnion?.GenelSekreter</div>
+                    </div>
+                    <div class="d-flex flex-row flex-col-responsive border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">Adres:</div>
+                        <div>@selectedUnion?.Adres</div>
+                    </div>
+                    <div class="d-flex flex-row flex-col-responsive border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">Fax:</div>
+                        <div>@selectedUnion?.Fax</div>
+                    </div>
+                    <div class="d-flex flex-row flex-col-responsive border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">Telefon:</div>
+                        <div>@selectedUnion?.Tel</div>
+                    </div>
+                    <div class="d-flex flex-row flex-col-responsive border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">Web Sitesi:</div>
+                        <div>@selectedUnion?.Web</div>
+                    </div>
+                    <div class="d-flex flex-row flex-col-responsive border-bottom padding-4">
+                        <div style="margin-right:10px" class="new-item-label font-weight-bold">E-Mail:</div>
+                        <div>@selectedUnion?.Email</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>Geçersiz Oda Tipi. Lütfen sayfa adresini kontrol edin.</div>
+    }
+}

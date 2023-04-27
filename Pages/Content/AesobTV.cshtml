@@ -1,0 +1,20 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.AesobTVModel
+@{
+    Layout = aesob.org.tr.Utilities.NavigationHelper.ContentLayoutPath;
+
+    <div class="d-flex flex-row flex-wrap align-items-start justify-content-start">
+        @{
+            foreach (var video in Model.Videos)
+            {
+                <a class="magazine-item image-list-element-container bg-aesob-blue-lighter position-relative" target="_blank" href="http://www.youtube.com/watch?v=@video.YoutubeVideoNumber">
+                    <img class="img-cover" style="height:100%;" src="http://img.youtube.com/vi/@video.YoutubeVideoNumber/1.jpg" onerror="this.src = '/images/Dergi/notfound.jpg'" />
+                    <div class="position-absolute bg-aesob-blue-light w-100" style="bottom:0;left:0;max-height:100px;">
+                        <div class="text-white align-text-center pl-1 pr-1" style="font-size:14px;">@video.ProgramAciklama</div>
+                        <div class="text-white align-text-center font-weight-bold bg-aesob-blue-lighter" style="font-size:16px;">@video.Tarih.Value.ToCulturalString()</div>
+                    </div>
+                </a>
+            }
+        }
+    </div>
+}

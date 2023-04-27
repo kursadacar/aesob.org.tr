@@ -1,0 +1,25 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.AnnouncementsModel
+@{
+    <div class="page-main-container">
+        <div class="slick-container w-100">
+            <div class="header-30">Duyurular</div>
+
+            <div class="d-flex flex-column justify-content-start align-items-start">
+                @foreach (var duyuru in Model.Announcements)
+                {
+                    var link = aesob.org.tr.Utilities.NavigationHelper.GetAnnouncementLink(duyuru);
+
+                    <a class="block-link-dark d-block border-bottom" href="@Href(link)">
+                        <div class="d-flex flex-column justify-content-start align-items-start">
+                            <div class="d-flex flex-row justify-content-start align-items-center text-black">
+                                <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
+                                <div style="text-align:left; font-size:14px;">@duyuru.Baslik</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

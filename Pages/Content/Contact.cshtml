@@ -1,0 +1,94 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.ContactModel
+@{
+    Layout = NavigationHelper.ContentLayoutPath;
+
+    <form id="contact-form" method="post" class="d-flex flex-column justify-content-start align-items-center">
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="name-field" class="input-label-big">Ad Soyad</label>
+            <input type="text" id="name-field" name="name" required class="input-field-big" />
+        </div>
+
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="phone-field" class="input-label-big">Cep Telefonu</label>
+            <input type="text" id="phone-field" name="phone" required inputmode="tel" class="input-field-big" />
+        </div>
+
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="email-field" class="input-label-big">E-Posta</label>
+            <input type="text" id="email-field" name="email" required inputmode="email" class="input-field-big" />
+        </div>
+
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="subject-field" class="input-label-big">Konu</label>
+            <input type="text" id="subject-field" name="subject" required class="input-field-big" />
+        </div>
+
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="message-field" class="input-label-big">Mesaj</label>
+            <textarea id="message-field" name="message" required cols="20" class="input-field-big textarea-fixed" ></textarea>
+        </div>
+
+        @*<div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+            <label for="captcha-field" class="input-label-big">Güvenlik Kodu</label>
+            <input type="text" id="captcha-field" name="captcha" required class="input-field-big"/>
+        </div>*@
+
+        <button id="send-button" type="button" class="slick-button" onclick="SendMessage()">Gönder</button>
+    </form>
+
+    <script>
+        function SendMessage() {
+            let hasEmptyFields =
+                $("#name-field").val().trim() == "" ||
+                $("#phone-field").val().trim() == "" ||
+                $("#email-field").val().trim() == "" ||
+                $("#subject-field").val().trim() == "" ||
+                $("#message-field").val().trim() == "";
+                //$("#captcha-field").val().trim() == "";
+
+            if (hasEmptyFields) {
+                Swal.fire("Hata", "Lütfen tüm alanları doldurun", "warning");
+                return;
+            }
+
+            let formData = new FormData($("#contact-form")[0]);
+
+            $("#send-button").attr("disabled", "disabled");
+
+            $.ajax(
+                {
+                    type: "post",
+                    url: '/Content/Contact?handler=SubmitForm',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    success: function (result) {
+                        $("#send-button").removeAttr("disabled");
+
+                        if (result == "success") {
+                            Swal.fire('Mesaj Gönderildi', 'Mesajınız başarı ile gönderildi', 'success').then(function () {
+                                window.location.reload();
+                            });
+                        }
+                        else if (result == "email-error") {
+                            Swal.fire('Hata', 'Geçersiz E-Posta adresi. Lütfen kontrol edin.', 'error');
+                        }
+                        else if (result == "error") {
+                            Swal.fire('Hata', 'Mesaj gönderilirken bir hata oluştu.', 'error');
+                        }
+                        else {
+                            Swal.fire('Hata', result, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Hata', 'Mesaj gönderilirken bir hata oluştu.', 'error').then(function () {
+                            window.location.reload();
+                        });
+                    }
+                }
+            )
+        }
+    </script>
+}

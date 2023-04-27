@@ -1,0 +1,30 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.NewsFeedModel
+@{
+    Layout = aesob.org.tr.Utilities.NavigationHelper.ContentLayoutPath;
+
+    @await Html.PartialAsync("Content/Partial/_PageSelection", Model);
+
+<div class="d-flex flex-row flex-wrap justify-content-start align-items-start w-100">
+    @foreach (var newsElement in Model.News)
+    {
+        var link = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(newsElement);
+        <a class="magazine-item image-list-element-container bg-aesob-blue-lighter position-relative" target="_blank" href="@Href(link)">
+            <img class="img-cover" style="height:100%;" src="~/images/Haber/Large/@newsElement.Resimyolu" onerror="this.src = '/images/Dergi/notfound.jpg'" />
+            @{
+                bool parsed = DateTime.TryParse(newsElement.Tarih, out var tarih);
+                if (!parsed)
+                {
+                    tarih = new DateTime(2009, 1, 1);
+                }
+            }
+            <div class="position-absolute bg-aesob-blue-light w-100" style="bottom:0;left:0;max-height:100px;">
+                <div class="text-white align-text-center pl-1 pr-2" style="font-size:14px;">@newsElement.Baslik</div>
+                <div class="text-white align-text-center font-weight-bold bg-aesob-blue-lighter w-100 pl-1 pr-2" style="font-size:16px;">@tarih.ToCulturalString()</div>
+            </div>
+        </a>
+    }
+</div>
+
+    @await Html.PartialAsync("Content/Partial/_PageSelection", Model);
+}

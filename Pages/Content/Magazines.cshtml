@@ -1,0 +1,23 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.MagazinesModel
+@{
+    Layout = aesob.org.tr.Utilities.NavigationHelper.ContentLayoutPath;
+
+    <div class="d-flex flex-row flex-wrap justify-content-start align-items-start">
+        @{
+            @await Html.PartialAsync("Content/Partial/_PageSelection", Model);
+
+            foreach (var mag in Model.Magazines)
+            {
+                <a class="magazine-item image-list-element-container bg-aesob-blue-lighter position-relative" target="_blank" href="~/images/Dergi/@mag.Dosyayolu">
+                    <img class="img-cover" style="height:100%;" src="~/images/Dergi/@mag.Kapakresimyolu" onerror="this.src = '/images/Dergi/notfound.jpg'" />
+                    <div class="position-absolute bg-aesob-blue-lighter w-100" style="bottom:0;left:0;max-height:80px;">
+                        <div class="text-white align-text-center font-weight-bold" style="font-size:16px;">@mag.Dergisayisi-@mag.Dergiyil</div>
+                    </div>
+                </a>
+            }
+
+            @await Html.PartialAsync("Content/Partial/_PageSelection", Model);
+        }
+    </div>
+}

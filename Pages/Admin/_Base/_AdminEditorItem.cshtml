@@ -1,0 +1,116 @@
+﻿@model Tuple<aesob.org.tr.Models.IAesobEntity, int>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnv;
+@{
+    var _model = Model.Item1;
+    int itemIndex = Model.Item2;
+    string formAreaID = "data-form-area-" + (itemIndex == -1 ? itemIndex : _model.EntityId);
+
+    <div id="data-form-area-@formAreaID" class="admin-item-box" style="position:relative;">
+        <div class="bg-aesob-blue w-100" style="height:28px;"></div>
+        <div class="slick-button block-link-dark bg-danger text-white" style="position:absolute; top:3px; right:3px; max-width:45px; height:20px;" onclick="removeItem(@Model.Item1.EntityId)">Sil</div>
+        <div class="d-flex flex-row justify-content-center align-items-center w-100" style="padding: 5px;">
+            <div class="d-flex flex-column justify-content-start align-items-center w-100">
+                @foreach (var property in _model.GetType().GetProperties())
+                {
+                    var entityAttr = property.GetCustomAttributes(typeof(aesob.org.tr.Models.AesobEntityDataAttribute), false).FirstOrDefault() as aesob.org.tr.Models.AesobEntityDataAttribute;
+                    if (entityAttr != null)
+                    {
+                        var propertyID = "ItemList_" + itemIndex + "__" + property.Name;
+                        var propertyName = "ItemList[" + itemIndex + "]." + property.Name;
+                        var propertyValue = property.GetValue(_model);
+
+                        if (itemIndex == -1)
+                        {
+                            propertyID = "NewItem_" + property.Name;
+                            propertyName = "NewItem." + property.Name;
+                            propertyValue = "";
+                        }
+
+                        if (entityAttr.DataType != Models.AesobEntityDataType.Hidden)
+                        {
+                            <label for="@propertyID" class="new-item-label font-weight-bold align-text-center">@entityAttr.AttributeName</label>
+                        }
+                        switch (entityAttr.DataType)
+                        {
+                            case Models.AesobEntityDataType.Hidden:
+                            {
+                                <input hidden style="pointer-events:none; user-select:none;" tabindex="-1" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" type="text" value="@propertyValue?.ToString()" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Text:
+                            {
+                                <input class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.TextArea:
+                            {
+                                string customID = itemIndex == -1 ? "textarea-non-wygwys" : "";
+                                <textarea @customID class="textarea-fixed" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue">@propertyValue</textarea>
+
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Image:
+                            {
+                                <input tabindex="-1" style="pointer-events:none" type="text" oninput="updateImagePreview(this, @itemIndex, '@entityAttr.ImageDirectory.Replace('\\','/')');" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                                <button id="file-selection-button-@Model.Item1.EntityId-@((int)entityAttr.DataType)" onclick="selectFromFiles('/images/@entityAttr.ImageDirectory.Replace('\\', '/')', '@propertyID', '.jpg,.png')" type="button">Resim Seç</button>
+                                <img class="img-cover" style="max-width:300px;" id="image-preview-@itemIndex" onerror="this.src = '/images/image-not-found.jpg'" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.File:
+                            {
+                                <input tabindex="-1" style="pointer-events: none; user-select: none;" type="text" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                                <button id="file-selection-button-@Model.Item1.EntityId-@((int)entityAttr.DataType)" onclick="selectFromFiles('/@entityAttr.UploadedFileDirectory.Replace('\\', '/')', '@propertyID', '@entityAttr.UploadedFileTypeFilter')" type="button">Dosya Seç</button>
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Number:
+                            {
+                                string rangeMaxText = entityAttr.RangeMax == -1 ? "" : "max=" + entityAttr.RangeMax;
+                                string rangeMinText = entityAttr.RangeMin == -1 ? "" : "min=" + entityAttr.RangeMin;
+                                <input type="number" @rangeMinText @rangeMaxText class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.YoutubePreview:
+                            {
+                                <input type="text" oninput="updateYoutubeImagePreview(this, @itemIndex);" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                                <img class="img-cover" style="max-width:300px;" id="youtube-image-preview-@itemIndex" onerror="this.src = '/images/image-not-found.jpg'" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Date:
+                            {
+                                DateTime.TryParse(propertyValue?.ToString(), out var parsedDate);
+                                if(parsedDate.Year  == 1)
+                                {
+                                    parsedDate = DateTime.Parse("2021-06-26");
+                                }
+                                var dateString = itemIndex == -1 ? DateTime.Now.ToString("yyyy-MM-dd") : parsedDate.ToString("yyyy-MM-dd");
+                                <input type="date" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@dateString" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Disabled:
+                            {
+                                <input disabled class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.Toggle:
+                            {
+                                var parsedValue = propertyValue?.ToString();
+                                propertyValue = (parsedValue == "True") ? "True" : "False";
+                                var checkedText = (propertyValue?.ToString() == "True") ? "checked" : "";
+                                <input type="checkbox" @checkedText onclick="this.value = this.value == 'True' ? 'False' : 'True';" oninput="this.checked = this.value == 'True';" style="-webkit-appearance:checkbox !important; width:25px; height:25px;" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                            }
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        @Html.Label(@property.Name, @property.Name, new { htmlAttributes = new { @class = "new-item-label font-weight-bold" } })
+                        @Html.Editor(@property.Name, new { htmlAttributes = new { @class = "new-item-field" } })
+                        @Html.ValidationMessage(@property.Name, new { htmlAttributes = new { @class = "text-danger" } })
+                    }
+                }
+            </div>
+        </div>
+
+        <div id="data-form-area-cover-@formAreaID" style="background-color: rgb(218 246 255 / 0.25); position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+    </div>
+}

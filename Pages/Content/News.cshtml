@@ -1,0 +1,37 @@
+﻿@page
+@model aesob.org.tr.Pages.Content.NewsModel
+@{
+    ViewData["Title"] = Model.Haber.Baslik;
+
+    <div class="page-main-container flex-nowrap flex-reverse-col-responsive">
+
+        <div class="page-main-container-small" style="max-width:450px !important; flex:auto;">
+            <div class="slick-container">
+                <img class="img-cover" src="~/images/Haber/Large/@Model.Haber.Resimyolu" />
+            </div>
+            <div class="slick-inner-container text-black">
+                <div class="header-30" style="font-size:24px;">
+                    Son Haberler
+                </div>
+                @foreach (var haber in Model.SonHaberler.Reverse())
+                    {
+                        var link = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(haber);
+                <a class="block-link-dark d-flex justify-content-start align-items-center border-bottom" style="padding:0px; text-align:left" href="@Href(link)">
+                    <img class="d-inline-block img-cover mr-1" style="max-width:120px;" src="~/images/Haber/Large/@haber.Resimyolu" />
+                    <i class="fa fa-angle-right" style="margin-right:10px; pointer-events:none"></i>@haber.Baslik
+                </a>
+                    }
+            </div>
+        </div>
+
+        <div class="page-main-container-large">
+            <div class="slick-container">
+                <div class="header-30 border-bottom">@Model.Haber.Baslik</div>
+                <div class="text-black">
+                    @Html.Raw(Model.Haber.Icerik)
+                </div>
+            </div>
+        </div>
+
+    </div>
+}

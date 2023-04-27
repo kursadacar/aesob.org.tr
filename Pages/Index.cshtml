@@ -1,0 +1,293 @@
+﻿@page
+@using aesob.org.tr.Utilities
+@model IndexModel
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<img class="img-cover hidden-responsive" style="margin-top: -90px !important; margin-bottom: -30px !important; margin-left: -20px; width:calc(100% + 40px);" src="~/images/front-page-banner.png" />
+
+<div class="page-main-container">
+
+    @{
+        <div class="d-flex flex-row flex-wrap justify-content-start align-items-center bg-aesob-dark pl-3 pb-1 pt-1 w-100">
+            @foreach (var item in NavigationHelper.NavBarElements.SelectMany(x => x.Items).Where(x => x.IsQuickLink))
+            {
+            <a class="block-link-dark font-size-20px" href="@Href("~/" + item.URL)">
+                <div class="d-flex flex-column justify-content-start align-items-start">
+                    <div class="d-flex flex-row justify-content-start align-items-center">
+                        <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
+                        <div class="text-white" style="text-align:left; font-size:16px;">@item.Title</div>
+                    </div>
+                </div>
+            </a>
+            }
+            <div class="block-link-dark font-size-20px" onclick="subscribeToEmail()">
+                <div class="d-flex flex-column justify-content-start align-items-start">
+                    <div class="d-flex flex-row justify-content-start align-items-center">
+                        <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
+                        <div class="text-white" style="text-align:left; font-size:16px;">E-Bülten Üyeliği</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Duyurular *@
+    <div class="w-100 mt-2 border-bottom border-top d-flex flex-row justify-content-start align-items-center hidden-responsive">
+        <a class="header-30 font-weight-light" style="font-family: MerriweatherLight" href="~/Content/Announcements">Duyurular</a>
+        <div class="w-100 d-flex flex-row flex-col-responsive justify-content-around align-items-center">
+            @foreach (var duyuru in Model.AnnouncementsFeed)
+            {
+                var link = aesob.org.tr.Utilities.NavigationHelper.GetAnnouncementLink(duyuru);
+
+            <a class="block-link-dark d-block border-bottom" href="@Href(link)">
+                <div class="d-flex flex-column justify-content-start align-items-start">
+                    <div class="d-flex flex-row justify-content-start align-items-center text-black">
+                        <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
+                        <div style="text-align:left; font-size:14px;">@duyuru.Baslik</div>
+                    </div>
+                </div>
+            </a>
+            }
+        </div>
+    </div>
+
+    @* Genelgeler *@
+    <div class="w-100 mt-2 border-bottom border-top d-flex flex-row justify-content-start align-items-center hidden-responsive">
+        <a class="header-30 font-weight-light" style="font-family: MerriweatherLight" href="~/Content/Circulars">Genelgeler</a>
+        <div class="w-100 d-flex flex-row flex-col-responsive justify-content-around align-items-center">
+            @foreach (var genelge in Model.CircularsFeed)
+            {
+                <a class="block-link-dark" target="_blank" href="~/images/Genelgeler/@genelge.Yolu">
+                <div class="d-flex flex-column justify-content-start align-items-start">
+                    <div class="d-flex flex-row justify-content-start align-items-center text-black">
+                        <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
+                        <div style="text-align:left; font-size:14px;">@genelge.Konu</div>
+                    </div>
+                </div>
+            </a>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex flex-row flex-col-responsive align-items-center justify-content-center mt-2 w-100">
+        @* Carousel *@
+        <div id="carousel" class="carousel slide w-100 mr-2" data-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    foreach (var news in Model.NewsFeed)
+                    {
+                        var activeText = "";
+                        if (news == Model.NewsFeed.FirstOrDefault())
+                        {
+                            activeText = "active";
+                        }
+                        var pageUrl = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(news);
+
+                    <div class="carousel-item h-500px @activeText" data-interval="6000">
+                        <img src="~/images/Haber/Large/@news.Resimyolu" class="img-cover w-100">
+                        <div class="carousel-inner-container">
+                            <div class="carousel-description">
+                                @news.Baslik
+                            </div>
+
+                            <div class="metro-button bg-aesob-dark text-white m-2" onclick="goToPage('@Href(pageUrl)')">
+                                Haber Detayları
+                            </div>
+                        </div>
+                    </div>
+                    }
+                }
+            </div>
+            <a class="carousel-control-prev no-decoration gradient-right carousel-control-container" href="#carousel" role="button" data-slide="prev">
+                <i class="fas fa-angle-left hover-animate-icon font-size-40px"></i>
+            </a>
+            <a class="carousel-control-next no-decoration gradient-left carousel-control-container" href="#carousel" role="button" data-slide="next">
+                <i class="fas fa-angle-right hover-animate-icon font-size-40px"></i>
+            </a>
+        </div>
+        @* Haberler *@
+        <div>
+            <div class="header-30 font-weight-light border-bottom" style="font-family: MerriweatherLight;">Son Haberler</div>
+            <div class="p-2 border-bottom">
+                <div class="d-flex flex-column flex-nowrap justify-content-start align-items-start">
+                    @foreach (var news in Model.NewsFeed)
+                    {
+                        var link = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(news);
+                    <a class="block-link-dark d-flex flex-row mb-1" style="text-align:left; font-size:14px; padding:8px 5px;" href="@Href(link)">
+                        <img class="img-cover" style="width:110px;" src="~/images/Haber/Large/@news.Resimyolu" />
+                        <div class="d-inline-block ml-2">
+                            <label class="font-weight-bold" style="font-size:14px;">@news.Baslik</label>
+                            @{
+                                    var tarih = news.Tarih;
+                                    try
+                                    {
+                                        tarih = DateTime.Parse(news.Tarih, System.Globalization.CultureInfo.InvariantCulture).ToCulturalString();
+                                    }
+                                    catch
+                                    {
+                                        //intentionally left blank
+                                    }
+                            }
+                            <span class="small-italic text-black" style="float: right; font-size: 14px; padding-right:5px;">@tarih</span>
+                        </div>
+                    </a>
+                    }
+                    <a class="metro-button bg-aesob-dark text-white align-self-center" style="max-width:240px; margin-top:5px;" href="~/Content/NewsFeed">Tüm Haberler</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Başkan *@
+    <div class="d-flex flex-row flex-col-responsive align-items-center-responsive justify-content-start align-items-start w-100 mt-3">
+        <div class="d-flex flex-column justify-content-start align-items-center align-items-center-responsive">
+            <img class="img-cover" style="width:300px" src="~/images/anasayfabaskandere.jpg" />
+            <div class="baskan-isim mr-2">@Model.Baskan.Isim</div>
+            <div class="text-black" style="text-align:left;font-size:14px;">Antalya Esnaf ve Sanatkarlar Odaları Birliği Başkanı</div>
+            <div class="d-flex flex-row justify-content-start justify-content-center-responsive align-items-center">
+                <a class="social-icon-container" href="https://@Model.Baskan.Twitter">
+                    <i class="fab fa-twitter social-icon"></i>
+                </a>
+                <a class="social-icon-container" href="https://@Model.Baskan.Facebook">
+                    <i class="fab fa-facebook social-icon"></i>
+                </a>
+                <a class="social-icon-container" href="https://@Model.Baskan.Instagram">
+                    <i class="fab fa-instagram social-icon"></i>
+                </a>
+            </div>
+        </div>
+        <div class="ml-2">
+            <div class="d-flex flex-row flex-wrap justify-content-start align-items-start border-bottom">
+                <div id="baskan-button-ozgecmis" class="block-link-dark" onclick="gosterBaskanContent(this, 'ozgecmis')">Özgeçmişi</div>
+                <div id="baskan-button-ofis" class="block-link-dark" onclick="gosterBaskanContent(this, 'ofis')">Ofisi</div>
+                <div id="baskan-button-proje" class="block-link-dark" onclick="gosterBaskanContent(this, 'proje')">Projeleri</div>
+                <div id="baskan-button-gorev" class="block-link-dark" onclick="gosterBaskanContent(this, 'gorev')">Görevleri</div>
+                <div id="baskan-button-mesaj" class="block-link-dark" onclick="gosterBaskanContent(this, 'mesaj')">Başkan'ın Mesajı</div>
+                <div id="baskan-close-button" class="block-link-dark" onclick="gosterBaskanContent(this, '')"><i class="fa fa-times"></i></div>
+            </div>
+            <div class="bg-aesob-whiteish-gray" style="max-height:290px; overflow:auto;">
+                <div id="baskan-content-ozgecmis" class="baskan-content-parent">
+                    <div class="p-2">
+                        <div class="font-weight-bold text-black">Adlıhan Dere | Özgeçmişi</div>
+                        <div class="baskan-content">@Html.Raw(Model._context.Iceriklers.FirstOrDefault(x => x.Id == 1).Icerik)</div>
+                    </div>
+                </div>
+                <div id="baskan-content-ofis" class="baskan-content-parent">
+                    <div class="p-2">
+                        <div class="font-weight-bold text-black">Adlıhan Dere | Çalışma Ofisi</div>
+                        <div class="baskan-content">@Html.Raw(Model._context.Iceriklers.FirstOrDefault(x => x.Id == 2).Icerik)</div>
+                    </div>
+                </div>
+                <div id="baskan-content-gorev" class="baskan-content-parent">
+                    <div class="p-2">
+                        <div class="font-weight-bold text-black">Adlıhan Dere | Görevleri</div>
+                        <div class="baskan-content">@Html.Raw(Model._context.Iceriklers.FirstOrDefault(x => x.Id == 3).Icerik)</div>
+                    </div>
+                </div>
+                <div id="baskan-content-proje" class="baskan-content-parent">
+                    <div class="p-2">
+                        <div class="font-weight-bold text-black">Adlıhan Dere | Projeleri</div>
+                        <div class="baskan-content">@Html.Raw(Model._context.Iceriklers.FirstOrDefault(x => x.Id == 4).Icerik)</div>
+                    </div>
+                </div>
+                <div id="baskan-content-mesaj" class="baskan-content-parent">
+                    <div class="p-2">
+                        <div class="font-weight-bold text-black">Adlıhan Dere | Mesajı</div>
+                        <div class="baskan-content">@Html.Raw(Model._context.Iceriklers.FirstOrDefault(x => x.Id == 62).Icerik)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="subscribe-modal" class="modal" style="position:relative; overflow:initial; width:350px; height:270px; padding:10px;">
+        <div class="font-size-20px font-weight-bold mb-2">E-Bülten Üyeliği</div>
+        <div class="w-100 h-100 d-flex flex-row justify-content-center align-items-center">
+            <form id="subscription-form" style="overflow: auto;" method="post">
+
+                <label class="input-label-big">İsim</label>
+                <input class="input-field-big" style="font-size:14px;" type="text" id="SubscriptionEmail" name="SubscriptionEmail" placeholder="E-Mail..." />
+
+                <label class="input-label-big">E-Mail</label>
+                <input class="input-field-big" style="font-size:14px;" type="text" id="SubscriptionName" name="SubscriptionName" placeholder="İsim..." />
+
+                <div class="d-flex flex-row justify-content-center align-items-center mt-2">
+                    <button type="button" class="block-link-dark bg-aesob-blue-light text-white m-3" onclick="postSubscribe()">Kayıt</button>
+                    <a class="block-link-dark bg-aesob-red text-white m-3" href="#close-modal" rel="modal:close">İptal</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function goToPage(url) {
+        window.location.href = url;
+    }
+
+    function subscribeToEmail() {
+        $("#subscribe-modal").modal();
+    }
+
+    var baskanContentIds = ["baskan-content-ozgecmis", "baskan-content-ofis", "baskan-content-gorev", "baskan-content-proje", "baskan-content-mesaj"];
+
+    var baskanContentHeights = [];
+    $(document).ready(function () {
+        for (let i = 0; i < baskanContentIds.length; i++) {
+            baskanContentHeights[i] = $("#" + baskanContentIds[i]).height();
+
+        }
+        $("#baskan-button-ozgecmis").trigger("click");
+    });
+    var selectedBaskanContentButton = null;
+
+    function gosterBaskanContent(buttonElement, contentName) {
+        $("#baskan-close-button").css("display", "none");
+        if (selectedBaskanContentButton != null) {
+            $(selectedBaskanContentButton).removeClass("select");
+        }
+        for (let i = 0; i < baskanContentIds.length; i++) {
+            if (baskanContentIds[i] == "baskan-content-" + contentName) {
+                $("#" + baskanContentIds[i]).css("height", baskanContentHeights[i] + "px");
+                $("#" + baskanContentIds[i]).addClass("active");
+                selectedBaskanContentButton = buttonElement;
+                $(selectedBaskanContentButton).addClass("select");
+                $("#baskan-close-button").css("display", "initial");
+            }
+            else {
+                $("#" + baskanContentIds[i]).css("height", "0px");
+                $("#" + baskanContentIds[i]).removeClass("active");
+            }
+        }
+    }
+
+    function postSubscribe() {
+        $.ajax({
+            url: '@HttpContext.Request.Path' + '?handler=SubscribeToEmail',
+            type: 'post',
+            data: $("#subscription-form").serialize(),
+            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+            success: function (result) {
+                if (result == "success") {
+                    Swal.fire("Kaydedildi", "İsminiz ve e-mail adresiniz e-posta veritabanına kayıt edildi", "success");
+                }
+                else if (result == "error-data") {
+                    Swal.fire("Hata", "Lütfen tüm alanları doldurduğunuzdan emin olun", "error");
+                }
+                else if (result == "error-already-exists") {
+                    Swal.fire("Hata", "Girdiğiniz e-posta sistemde zaten kayıtlı", "error"); 1
+                }
+                else if (result.startsWith("error")) {
+                    Swal.fire("Hata", "E-Mail listesine kayıt olunurken bir hata oluştu: " + result, "error");
+                }
+                else {
+                    Swal.fire("Hata", "E-Mail listesine kayıt olunurken bir hata oluştu", "error");
+                }
+            }
+        });
+    }
+</script>
