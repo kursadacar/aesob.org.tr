@@ -4,7 +4,8 @@ namespace aesob.org.tr.Pages.Admin
 {
     public class OdaEditorModel : AdminModelBase<Odalar>
     {
-        public OdaEditorModel(AesobDbContext context) : base(context)
+        public OdaEditorModel(AesobDbContext context)
+            : base(context)
         {
         }
     }

@@ -4,9 +4,9 @@ namespace aesob.org.tr.Pages.Admin
 {
     public class KurulEditorModel : AdminModelBase<KurulUyeleri>
     {
-        public KurulEditorModel(AesobDbContext context) : base(context)
+        public KurulEditorModel(AesobDbContext context)
+            : base(context)
         {
-
         }
     }
 }

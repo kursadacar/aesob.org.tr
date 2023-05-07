@@ -4,7 +4,8 @@ namespace aesob.org.tr.Pages.Admin
 {
     public class DuyuruEditorModel : AdminModelBase<Duyurular>
     {
-        public DuyuruEditorModel(AesobDbContext context) : base(context)
+        public DuyuruEditorModel(AesobDbContext context)
+            : base(context)
         {
         }
     }

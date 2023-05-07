@@ -1,21 +1,23 @@
-using Microsoft.AspNetCore.Mvc;
 using aesob.org.tr.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace aesob.org.tr.Pages.Content
 {
-    public enum UnionType : int
+    public enum UnionType
     {
-        MerkezOda = 0,
-        IlceOda = 1,
+        MerkezOda,
+        IlceOda,
         NumUnions
     }
 
     public class UnionsModel : AesobModelBase
     {
         public bool IsCentral { get; private set; }
+
         public int UnionID { get; private set; }
 
-        public UnionsModel(AesobDbContext context) : base(context)
+        public UnionsModel(AesobDbContext context)
+            : base(context)
         {
         }
 
@@ -23,7 +25,6 @@ namespace aesob.org.tr.Pages.Content
         {
             IsCentral = type == 0;
             UnionID = union;
-
             return Page();
         }
     }

@@ -1,5 +1,6 @@
 ﻿@page
 @using aesob.org.tr.Utilities
+@using aesob.org.tr;
 @model IndexModel
 @{
     ViewData["Title"] = "Ana Sayfa";
@@ -13,14 +14,14 @@
         <div class="d-flex flex-row flex-wrap justify-content-start align-items-center bg-aesob-dark pl-3 pb-1 pt-1 w-100">
             @foreach (var item in NavigationHelper.NavBarElements.SelectMany(x => x.Items).Where(x => x.IsQuickLink))
             {
-            <a class="block-link-dark font-size-20px" href="@Href("~/" + item.URL)">
-                <div class="d-flex flex-column justify-content-start align-items-start">
-                    <div class="d-flex flex-row justify-content-start align-items-center">
-                        <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
-                        <div class="text-white" style="text-align:left; font-size:16px;">@item.Title</div>
+                <a class="block-link-dark font-size-20px" href="@Href("~/" + item.URL)">
+                    <div class="d-flex flex-column justify-content-start align-items-start">
+                        <div class="d-flex flex-row justify-content-start align-items-center">
+                            <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
+                            <div class="text-white" style="text-align:left; font-size:16px;">@item.Title</div>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
             }
             <div class="block-link-dark font-size-20px" onclick="subscribeToEmail()">
                 <div class="d-flex flex-column justify-content-start align-items-start">
@@ -41,14 +42,14 @@
             {
                 var link = aesob.org.tr.Utilities.NavigationHelper.GetAnnouncementLink(duyuru);
 
-            <a class="block-link-dark d-block border-bottom" href="@Href(link)">
-                <div class="d-flex flex-column justify-content-start align-items-start">
-                    <div class="d-flex flex-row justify-content-start align-items-center text-black">
-                        <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
-                        <div style="text-align:left; font-size:14px;">@duyuru.Baslik</div>
+                <a class="block-link-dark d-block border-bottom" href="@Href(link)">
+                    <div class="d-flex flex-column justify-content-start align-items-start">
+                        <div class="d-flex flex-row justify-content-start align-items-center text-black">
+                            <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
+                            <div style="text-align:left; font-size:14px;">@duyuru.Baslik</div>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
             }
         </div>
     </div>
@@ -60,13 +61,13 @@
             @foreach (var genelge in Model.CircularsFeed)
             {
                 <a class="block-link-dark" target="_blank" href="~/images/Genelgeler/@genelge.Yolu">
-                <div class="d-flex flex-column justify-content-start align-items-start">
-                    <div class="d-flex flex-row justify-content-start align-items-center text-black">
-                        <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
-                        <div style="text-align:left; font-size:14px;">@genelge.Konu</div>
+                    <div class="d-flex flex-column justify-content-start align-items-start">
+                        <div class="d-flex flex-row justify-content-start align-items-center text-black">
+                            <i class="fa fa-angle-right" style="font-size:16px; margin-right:7px; pointer-events:none"></i>
+                            <div style="text-align:left; font-size:14px;">@genelge.Konu</div>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
             }
         </div>
     </div>
@@ -85,18 +86,18 @@
                         }
                         var pageUrl = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(news);
 
-                    <div class="carousel-item h-500px @activeText" data-interval="6000">
-                        <img src="~/images/Haber/Large/@news.Resimyolu" class="img-cover w-100">
-                        <div class="carousel-inner-container">
-                            <div class="carousel-description">
-                                @news.Baslik
-                            </div>
+                        <div class="carousel-item h-500px @activeText" data-interval="6000">
+                            <img src="~/images/Haber/Large/@news.Resimyolu" class="img-cover w-100">
+                            <div class="carousel-inner-container">
+                                <div class="carousel-description">
+                                    @news.Baslik
+                                </div>
 
-                            <div class="metro-button bg-aesob-dark text-white m-2" onclick="goToPage('@Href(pageUrl)')">
-                                Haber Detayları
+                                <div class="metro-button bg-aesob-dark text-white m-2" onclick="goToPage('@Href(pageUrl)')">
+                                    Haber Detayları
+                                </div>
                             </div>
                         </div>
-                    </div>
                     }
                 }
             </div>
@@ -115,11 +116,11 @@
                     @foreach (var news in Model.NewsFeed)
                     {
                         var link = aesob.org.tr.Utilities.NavigationHelper.GetNewsLink(news);
-                    <a class="block-link-dark d-flex flex-row mb-1" style="text-align:left; font-size:14px; padding:8px 5px;" href="@Href(link)">
-                        <img class="img-cover" style="width:110px;" src="~/images/Haber/Large/@news.Resimyolu" />
-                        <div class="d-inline-block ml-2">
-                            <label class="font-weight-bold" style="font-size:14px;">@news.Baslik</label>
-                            @{
+                        <a class="block-link-dark d-flex flex-row mb-1" style="text-align:left; font-size:14px; padding:8px 5px;" href="@Href(link)">
+                            <img class="img-cover" style="width:110px;" src="~/images/Haber/Large/@news.Resimyolu" />
+                            <div class="d-inline-block ml-2">
+                                <label class="font-weight-bold" style="font-size:14px;">@news.Baslik</label>
+                                @{
                                     var tarih = news.Tarih;
                                     try
                                     {
@@ -129,10 +130,10 @@
                                     {
                                         //intentionally left blank
                                     }
-                            }
-                            <span class="small-italic text-black" style="float: right; font-size: 14px; padding-right:5px;">@tarih</span>
-                        </div>
-                    </a>
+                                }
+                                <span class="small-italic text-black" style="float: right; font-size: 14px; padding-right:5px;">@tarih</span>
+                            </div>
+                        </a>
                     }
                     <a class="metro-button bg-aesob-dark text-white align-self-center" style="max-width:240px; margin-top:5px;" href="~/Content/NewsFeed">Tüm Haberler</a>
                 </div>
@@ -222,6 +223,12 @@
         </div>
     </div>
 
+    <!-- Popup Overlay -->
+    <div id="popup-overlay-parent" style="display:none; z-index:999; position:fixed; left: 0; top: 0; width: 100vw; height: 100vh;">
+        <div id="popup-overlay-background" class="w-100 h-100" style="position:absolute; background-color: rgb(0 0 0 / 0.2)" onclick="closePopupOverlay();"></div>
+        <div id="popup-overlay" style="width: calc(100% - 70px); height: calc(100% - 70px); margin: 35px;"></div>
+    </div>
+
 </div>
 
 <script>
@@ -272,22 +279,117 @@
             data: $("#subscription-form").serialize(),
             headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
             success: function (result) {
-                if (result == "success") {
+                console.log(result);
+
+                let resultType = result["result"];
+                let resultMessage = result["message"];
+
+                if (resultType == "Success") {
                     Swal.fire("Kaydedildi", "İsminiz ve e-mail adresiniz e-posta veritabanına kayıt edildi", "success");
                 }
-                else if (result == "error-data") {
-                    Swal.fire("Hata", "Lütfen tüm alanları doldurduğunuzdan emin olun", "error");
-                }
-                else if (result == "error-already-exists") {
-                    Swal.fire("Hata", "Girdiğiniz e-posta sistemde zaten kayıtlı", "error"); 1
-                }
-                else if (result.startsWith("error")) {
-                    Swal.fire("Hata", "E-Mail listesine kayıt olunurken bir hata oluştu: " + result, "error");
-                }
-                else {
-                    Swal.fire("Hata", "E-Mail listesine kayıt olunurken bir hata oluştu", "error");
+                else if (resultType == "Fail") {
+                    Swal.fire("Hata", "E-Mail listesine kayıt olunurken bir hata oluştu: " + resultMessage, "error");
                 }
             }
         });
     }
+
+    var latestOverlayId = -1;
+
+    function closePopupNeverShowQuery() {
+        Swal.fire({
+            title: 'Uyarı',
+            text: 'Bu duyuru bir daha görüntülenmeyecek. Emin misiniz?',
+            showCloseButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonText:
+                'Evet',
+            cancelButtonText:
+                'Hayır',
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                closePopupOverlay(true);
+            }
+            else {
+                Swal.close();
+            }
+        });
+    }
+
+    function closePopupOverlay(neverShowAgain) {
+        $("#popup-overlay-parent").html("");
+        $("#popup-overlay-parent").css("display", "none");
+        if (neverShowAgain == true && latestOverlayId != -1 && latestOverlayId != null && latestOverlayId != "") {
+            Cookies.set("lastViewedOverlay", latestOverlayId);
+        }
+    }
+
+    function fileExists(dir, successCallback, failCallback) {
+        let reqURL = '@Model.HttpContext.Request.Path?handler=FileExists';
+
+        $.ajax({
+            url: reqURL,
+            type: 'get',
+            data: { directory: dir },
+            success: function (result) {
+                if (result == true) {
+                    console.log(result);
+                    successCallback();
+                }
+                else {
+                    failCallback();
+                }
+            }
+        });
+    }
+
+    $.ajax({
+        url: '@Model.HttpContext.Request.Path?handler=LatestPopup',
+        type: 'get',
+        headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+        success: function (result) {
+            if (result != null && result != "") {
+                let popupOverlay = $("#popup-overlay");
+
+                popupOverlay.html("");
+
+                popupOverlay.load('@Url.Content("~/_PageTemplates/_popupInfoTemplate.html")', function () {
+                    let parsedResult = JSON.parse(result);
+
+                    latestOverlayId = parsedResult['Id'];
+
+                    if (Cookies.get("lastViewedOverlay") != latestOverlayId) {
+                        $("#popup-overlay-parent").css("display", "");
+
+                        $(this).find('#title').text(parsedResult['Title']);
+                        $(this).find("#description").text(parsedResult['Description']);
+                        $(this).find("#close-button").click(function () { closePopupOverlay(); });
+                        $(this).find("#never-show-button").click(function () { closePopupNeverShowQuery(); });
+
+                        let imageURL = '@Url.Content("~/images/Popup/")' + parsedResult['ImageLink'];
+                        let imageElement = $(this).find("#image");
+
+                        fileExists(imageURL, function () {
+                            imageElement.attr("src", imageURL);
+                            imageElement.click(function () {
+                                window.open(imageURL, '_blank');
+                            });
+                        }, function () {
+                            imageElement.css("display", "none");
+                        });
+
+                        let videoURL = '@Url.Content("~/images/Popup/Video/")' + parsedResult['VideoLink'];
+                        let videoElement = $(this).find("#video");
+
+                        fileExists(videoURL, function () {
+                            videoElement.attr("src", videoURL);
+                        }, function () {
+                            videoElement.css("display", "none");
+                        });
+                    }
+                });
+            }
+        }
+    });
 </script>

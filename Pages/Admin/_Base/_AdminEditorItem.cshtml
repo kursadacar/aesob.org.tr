@@ -52,8 +52,15 @@
                             case Models.AesobEntityDataType.Image:
                             {
                                 <input tabindex="-1" style="pointer-events:none" type="text" oninput="updateImagePreview(this, @itemIndex, '@entityAttr.ImageDirectory.Replace('\\','/')');" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
-                                <button id="file-selection-button-@Model.Item1.EntityId-@((int)entityAttr.DataType)" onclick="selectFromFiles('/images/@entityAttr.ImageDirectory.Replace('\\', '/')', '@propertyID', '.jpg,.png')" type="button">Resim Seç</button>
+                                <button id="file-selection-button-@Model.Item1.EntityId-@((int)entityAttr.DataType)" onclick="selectFromFiles('/images/@entityAttr.ImageDirectory.Replace('\\', '/')', '@propertyID', '.jpg,.png,.jpeg')" type="button">Resim Seç</button>
                                 <img class="img-cover" style="max-width:300px;" id="image-preview-@itemIndex" onerror="this.src = '/images/image-not-found.jpg'" />
+                            }
+                            break;
+                            case Models.AesobEntityDataType.SelfHostedVideo:
+                            {
+                                <input tabindex="-1" style="pointer-events:none" type="text" oninput="updateImagePreview(this, @itemIndex, '@entityAttr.UploadedFileDirectory.Replace('\\','/')');" class="admin-input" data-val="true" data-val-required="The @propertyName field is required." id="@propertyID" name="@propertyName" value="@propertyValue" />
+                                <button id="file-selection-button-@Model.Item1.EntityId-@((int)entityAttr.DataType)" onclick="selectFromFiles('/@entityAttr.UploadedFileDirectory.Replace('\\', '/')', '@propertyID', '.mp4,.mkv,.avi')" type="button">Video Seç</button>
+                                <video id="self-hosted-video-preview"></video>
                             }
                             break;
                             case Models.AesobEntityDataType.File:
@@ -78,7 +85,7 @@
                             case Models.AesobEntityDataType.Date:
                             {
                                 DateTime.TryParse(propertyValue?.ToString(), out var parsedDate);
-                                if(parsedDate.Year  == 1)
+                                if (parsedDate.Year == 1)
                                 {
                                     parsedDate = DateTime.Parse("2021-06-26");
                                 }

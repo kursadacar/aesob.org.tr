@@ -1,20 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
+using System.Text.Json;
 using aesob.org.tr.Models;
 using aesob.org.tr.Utilities;
 using Microsoft.AspNetCore.Authentication;
-using System.Diagnostics;
-using System;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace aesob.org.tr
 {
     public abstract class AesobModelBase : PageModel
     {
         public readonly AesobDbContext _context;
+
         public NavigationHelper.NavBarCategory CurrentCategory { get; private set; }
+
         public NavigationHelper.NavBarPage CurrentPage { get; private set; }
+
         public bool HasLoggedIn { get; private set; }
 
         public AesobModelBase(AesobDbContext context)
@@ -26,95 +34,103 @@ namespace aesob.org.tr
         {
             int categoryID = -1;
             int pageID = -1;
-
-            var requestUrl = HttpContext.Request.Path.Value + HttpContext.Request.QueryString;
-
-            var elements = NavigationHelper.NavBarElements;
-
-            foreach(var nav in elements)
+            string requestUrl = HttpContext.Request.Path.Value + HttpContext.Request.QueryString.ToString();
+            IEnumerable<NavigationHelper.NavBarCategory> elements = NavigationHelper.NavBarElements;
+            foreach (NavigationHelper.NavBarCategory nav in elements)
             {
-                foreach(var page in nav.Items)
+                foreach (NavigationHelper.NavBarPage page2 in nav.Items)
                 {
-                    if (requestUrl == "/" + page.URL)
+                    if (requestUrl == "/" + page2.URL)
                     {
                         categoryID = nav.NavID;
-                        pageID = page.PageID;
+                        pageID = page2.PageID;
                     }
                 }
             }
-
-            if(categoryID == -1 && pageID == -1)
+            if (categoryID == -1 && pageID == -1)
             {
-                List<(NavigationHelper.NavBarCategory, NavigationHelper.NavBarPage)> found = new List<(NavigationHelper.NavBarCategory, NavigationHelper.NavBarPage)>();
-
-                foreach (var nav in elements)
+                List<ValueTuple<NavigationHelper.NavBarCategory, NavigationHelper.NavBarPage>> found = new List<ValueTuple<NavigationHelper.NavBarCategory, NavigationHelper.NavBarPage>>();
+                foreach (NavigationHelper.NavBarCategory nav2 in elements)
                 {
-                    foreach (var page in nav.Items)
+                    foreach (NavigationHelper.NavBarPage page in nav2.Items)
                     {
                         if (requestUrl.Contains(page.URL.Split('?')[0]))
                         {
-                            found.Add((nav, page));
-                            categoryID = nav.NavID;
+                            found.Add(new ValueTuple<NavigationHelper.NavBarCategory, NavigationHelper.NavBarPage>(nav2, page));
+                            categoryID = nav2.NavID;
                             pageID = page.PageID;
                         }
                     }
                 }
-
                 if (found.Count > 1)
                 {
                     int maxSimilarities = 0;
                     NavigationHelper.NavBarPage? mostSimilarPage = null;
                     NavigationHelper.NavBarCategory? mostSimilarCategory = null;
-
-                    var splitUrlRes = requestUrl.Split('?').Last()?.Split('&').ToList();
+                    string text = requestUrl.Split('?').Last();
+                    List<string> splitUrlRes = text != null ? text.Split('&').ToList() : null;
                     if (splitUrlRes != null)
                     {
-                        foreach(var foundItem in found)
+                        foreach (var foundItem in found)
                         {
-                            var split = foundItem.Item2.URL.Split('?').Last()?.Split("&").ToList();
-
-                            if (split != null)
+                            string text2 = foundItem.Item2.URL.Split('?').Last();
+                            List<string> split = text2 != null ? text2.Split("&").ToList() : null;
+                            if (split == null)
                             {
-                                int similiarities = 0;
-
-                                for (int i = 0; i < split.Count; i++)
+                                continue;
+                            }
+                            int similiarities = 0;
+                            for (int i = 0; i < split.Count; i++)
+                            {
+                                if (splitUrlRes.Count > i && split[i] == splitUrlRes[i])
                                 {
-                                    if (splitUrlRes.Count > i && split[i] == splitUrlRes[i])
-                                    {
-                                        similiarities++;
-                                    }
+                                    similiarities++;
                                 }
-
-                                if (similiarities > maxSimilarities)
-                                {
-                                    maxSimilarities = similiarities;
-                                    mostSimilarCategory = foundItem.Item1;
-                                    mostSimilarPage = foundItem.Item2;
-                                }
+                            }
+                            if (similiarities > maxSimilarities)
+                            {
+                                maxSimilarities = similiarities;
+                                mostSimilarCategory = foundItem.Item1;
+                                mostSimilarPage = foundItem.Item2;
                             }
                         }
                     }
-
-                    if(mostSimilarCategory.HasValue && mostSimilarPage.HasValue)
+                    if (mostSimilarCategory.HasValue && mostSimilarPage.HasValue)
                     {
                         categoryID = mostSimilarCategory.Value.NavID;
                         pageID = mostSimilarPage.Value.PageID;
                     }
                 }
             }
-
-            ViewData["HasLoggedIn"] = User?.Identity?.IsAuthenticated == true;
+            ViewDataDictionary viewData = ViewData;
+            ClaimsPrincipal user = User;
+            int num;
+            if (user == null)
+            {
+                num = 0;
+            }
+            else
+            {
+                IIdentity identity = user.Identity;
+                num = (identity != null ? new bool?(identity.IsAuthenticated) : null) == true ? 1 : 0;
+            }
+            viewData["HasLoggedIn"] = (byte)num != 0;
+            ViewData["IsDevelopment"] = false;
 #if DEBUG
             ViewData["IsDevelopment"] = true;
-#else
-            ViewData["IsDevelopment"] = false;
 #endif
-
-            if (User?.Identity?.IsAuthenticated != true)
+            ClaimsPrincipal user2 = User;
+            if (user2 != null)
             {
-                HttpContext.SignOutAsync().Wait();
+                IIdentity identity2 = user2.Identity;
+                if ((identity2 != null ? new bool?(identity2.IsAuthenticated) : null) == true)
+                {
+                    goto IL_0390;
+                }
             }
-
+            HttpContext.SignOutAsync().Wait();
+            goto IL_0390;
+        IL_0390:
             if (categoryID >= 0)
             {
                 try
@@ -123,11 +139,11 @@ namespace aesob.org.tr
                 }
                 catch
                 {
-                    if(categoryID == NavigationHelper.AdminCategory.NavID)
+                    if (categoryID == NavigationHelper.AdminCategory.NavID)
                     {
                         CurrentCategory = NavigationHelper.AdminCategory;
                     }
-                    else if(categoryID == NavigationHelper.LoginCategory.NavID)
+                    else if (categoryID == NavigationHelper.LoginCategory.NavID)
                     {
                         CurrentCategory = NavigationHelper.LoginCategory;
                     }
@@ -138,7 +154,6 @@ namespace aesob.org.tr
                         CurrentCategory = NavigationHelper.NavBarElements.FirstOrDefault();
                     }
                 }
-
                 if (pageID >= 0)
                 {
                     CurrentPage = CurrentCategory.Items.ElementAt(pageID);
@@ -153,15 +168,32 @@ namespace aesob.org.tr
                 CurrentCategory = default;
                 CurrentPage = default;
             }
-
             ViewData["Title"] = CurrentPage.Title;
             ViewData["CurrentCategory"] = CurrentCategory;
             ViewData["CurrentPage"] = CurrentPage;
-
             return base.Page();
         }
 
+        public IActionResult OnGetLatestPopup()
+        {
+            Popup latestFoundPopup = _context.Popups.ToList().LastOrDefault((x) => x.IsActive);
+            if (latestFoundPopup == null)
+            {
+                return new EmptyResult();
+            }
+            return new ObjectResult(JsonSerializer.Serialize(latestFoundPopup));
+        }
 
-
+        public IActionResult OnGetFileExists(string directory)
+        {
+            IWebHostEnvironment webHostEnv = (IWebHostEnvironment)HttpContext.RequestServices.GetService(typeof(IWebHostEnvironment));
+            bool result = false;
+            string actualPath = webHostEnv.WebRootPath + directory;
+            if (System.IO.File.Exists(actualPath))
+            {
+                result = true;
+            }
+            return new ObjectResult(result);
+        }
     }
 }

@@ -4,7 +4,8 @@ namespace aesob.org.tr.Pages.Admin
 {
     public class IcerikEditorModel : AdminModelBase<Icerikler>
     {
-        public IcerikEditorModel(AesobDbContext context) : base(context)
+        public IcerikEditorModel(AesobDbContext context)
+            : base(context)
         {
         }
     }

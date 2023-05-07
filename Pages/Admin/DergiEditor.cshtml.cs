@@ -4,7 +4,8 @@ namespace aesob.org.tr.Pages.Admin
 {
     public class DergiEditorModel : AdminModelBase<Dergi>
     {
-        public DergiEditorModel(AesobDbContext context) : base(context)
+        public DergiEditorModel(AesobDbContext context)
+            : base(context)
         {
         }
     }

@@ -1,29 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using aesob.org.tr.Models;
 using aesob.org.tr.Utilities;
-using System.Security.Claims;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace aesob.org.tr.Pages
 {
     public class LoginModel : AesobModelBase
     {
-        public LoginModel(AesobDbContext context) : base(context)
+        private class LoginResult : IActionResult
         {
-        }
+            private string _username;
 
-        class LoginResult : IActionResult
-        {
-            string _username;
-            string _password;
-            AesobDbContext _dbContext;
-            HttpContext _httpContext;
+            private string _password;
+
+            private AesobDbContext _dbContext;
+
+            private HttpContext _httpContext;
 
             public LoginResult(string username, string password, AesobDbContext dbContext, HttpContext httpContext)
             {
@@ -36,50 +34,44 @@ namespace aesob.org.tr.Pages
             public Task ExecuteResultAsync(ActionContext context)
             {
                 string hashedPassword = EncryptionHelper.Encrypt(_password);
-
-                var user = _dbContext.Users.FirstOrDefault(x => x.Username == _username && x.Password == hashedPassword);
-
+                User user = _dbContext.Users.FirstOrDefault((User x) => x.Username == _username && x.Password == hashedPassword);
                 if (user != null)
                 {
-                    var claims = new List<Claim>()
+                    List<Claim> claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.ID)),
-                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", Convert.ToString(user.ID)),
+                        new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", user.Username)
                     };
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    var principal = new ClaimsPrincipal(identity);
-
-                    _httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties()
+                    ClaimsIdentity identity = new ClaimsIdentity(claims, "Cookies");
+                    ClaimsPrincipal principal = new ClaimsPrincipal(identity);
+                    _httpContext.SignInAsync("Cookies", principal, new AuthenticationProperties
                     {
                         IsPersistent = true,
                         AllowRefresh = true,
                         IssuedUtc = DateTimeOffset.UtcNow,
-                        ExpiresUtc = (DateTimeOffset.Now.AddDays(1))
+                        ExpiresUtc = DateTimeOffset.Now.AddDays(1.0)
                     }).Wait();
-
-                    var result = new ObjectResult("success");
-                    return result.ExecuteResultAsync(context);
+                    ObjectResult result2 = new ObjectResult("success");
+                    return result2.ExecuteResultAsync(context);
                 }
-                else
-                {
-                    var result = new ObjectResult("error");
-                    return result.ExecuteResultAsync(context);
-                }
+                ObjectResult result = new ObjectResult("error");
+                return result.ExecuteResultAsync(context);
             }
+        }
+
+        public LoginModel(AesobDbContext context)
+            : base(context)
+        {
         }
 
         public IActionResult OnPostLogin(IFormCollection data)
         {
-            //_signInManager.IsSignedIn()
-
-            return new LoginResult(data["username"], data["password"], _context, HttpContext);
+            return new LoginResult(data["username"], data["password"], _context, base.HttpContext);
         }
 
         public IActionResult OnGetLogout()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
+            base.HttpContext.SignOutAsync("Cookies").Wait();
             return RedirectToPage("/Index");
         }
 

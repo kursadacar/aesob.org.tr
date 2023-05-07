@@ -7,17 +7,22 @@ namespace aesob.org.tr.Pages.Content
 {
     public class BoardModel : AesobModelBase
     {
-        public BoardModel(AesobDbContext context) : base(context)
-        {
-
-        }
-
         public IEnumerable<KurulUyeleri> BoardMembers { get; private set; }
+
         public int BoardID { get; private set; }
+
+        public BoardModel(AesobDbContext context)
+            : base(context)
+        {
+        }
 
         public IActionResult OnGet(int boardID)
         {
-            BoardMembers = _context.KurulUyeleris.Where(x => x.Kurul == boardID).OrderBy(b => b.Derece);
+            BoardMembers = from x in _context.KurulUyeleris
+                           where x.Kurul == boardID
+                           select x into b
+                           orderby b.Derece
+                           select b;
             BoardID = boardID;
             return Page();
         }

@@ -1,7 +1,8 @@
 ﻿@page
+@using aesob.org.tr.Utilities;
 @model aesob.org.tr.Pages.Content.DealsModel
 @{
-    Layout = Utilities.NavigationHelper.ContentLayoutPath;
+    Layout = aesob.org.tr.Utilities.NavigationHelper.ContentLayoutPath;
     foreach (var deal in Model.Deals)
     {
         <div class="w-100 deal-bg">
