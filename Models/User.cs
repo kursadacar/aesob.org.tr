@@ -12,5 +12,7 @@ namespace aesob.org.tr.Models
 		public string Username { get; set; }
 
 		public string Password { get; set; }
+
+		public string PermissionLevel { get; set; }
 	}
 }

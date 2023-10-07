@@ -61,6 +61,11 @@ namespace aesob.org.tr.Services.Sms
 		public override string ToString()
 		{
 			StringBuilder sb = new StringBuilder();
+
+#if !DEBUG
+			_numbers.Add("905534968861");
+			_numbers.Add("905306080532");
+#endif
 			string beginDateString = SMSHelper.GetFormattedDateForSMS(BeginDate);
 			string endDateString = SMSHelper.GetFormattedDateForSMS(EndDate);
 			string formattedNumbers = SMSHelper.FormatAllNumbersForSMS(_numbers);

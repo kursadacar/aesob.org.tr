@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aesob.org.tr", "aesob.org.tr.csproj", "{B43BB67D-DE00-4866-8959-869E14464ADF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aesob.Web.Library", "..\AesobWebCore\Aesob.Web.Library\Aesob.Web.Library.csproj", "{8A0167A2-966D-400B-ACB7-02BF9EEE1A90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B43BB67D-DE00-4866-8959-869E14464ADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43BB67D-DE00-4866-8959-869E14464ADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43BB67D-DE00-4866-8959-869E14464ADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A0167A2-966D-400B-ACB7-02BF9EEE1A90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A0167A2-966D-400B-ACB7-02BF9EEE1A90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A0167A2-966D-400B-ACB7-02BF9EEE1A90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A0167A2-966D-400B-ACB7-02BF9EEE1A90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

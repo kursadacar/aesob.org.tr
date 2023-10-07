@@ -390,12 +390,14 @@ namespace aesob.org.tr.Models
 				entity.Property((Youtubevideo e) => e.YoutubeThumbSize).HasMaxLength(50).IsUnicode(false);
 				entity.Property((Youtubevideo e) => e.YoutubeVideoNumber).HasMaxLength(50).IsUnicode(false);
 			});
+
 			modelBuilder.Entity(delegate(EntityTypeBuilder<User> entity)
 			{
 				entity.HasKey((User e) => e.ID);
 				entity.ToTable("User");
-				entity.Property((User e) => e.Username).HasMaxLength(64).IsUnicode(false);
-				entity.Property((User e) => e.Password).HasMaxLength(64).IsUnicode(false);
+				entity.Property((User e) => e.Username).HasMaxLength(64);
+				entity.Property((User e) => e.Password).HasMaxLength(128);
+				entity.Property((User e) => e.PermissionLevel).HasMaxLength(16);
 			});
 		}
 	}

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using aesob.org.tr.Models;
 using aesob.org.tr.Utilities;
+using Aesob.Web.Library.Email;
 
 namespace aesob.org.tr.Services
 {
@@ -89,7 +90,7 @@ namespace aesob.org.tr.Services
 
 		private static ServiceActionResult SendEmail(string senderAlias, string subject, string content, params string[] targetAddresses)
 		{
-			return EmailService.SendBulletinEmail(new EmailService.MailData(senderAlias, subject, content, targetAddresses));
+			return EmailService.SendBulletinEmail(new EMailData(senderAlias, subject, content, targetAddresses));
 		}
 
 		private static List<string> GetTargetEmails(EBulten[] bulletins)

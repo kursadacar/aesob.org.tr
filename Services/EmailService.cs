@@ -5,81 +5,80 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using aesob.org.tr.Utilities;
+using Aesob.Web.Library.Email;
 using Microsoft.AspNetCore.Hosting;
 
 namespace aesob.org.tr.Services
 {
 	public static class EmailService
 	{
-		public struct MailData
-		{
-			public string SenderAlias { get; set; }
-
-			public string Subject { get; set; }
-
-            public string Content { get; set; }
-
-            public string[] TargetAddresses { get; set; }
-
-            public Dictionary<string, byte[]> Attachments { get; set; }
-
-            public MailData(string senderAlias, string subject, string content, params string[] targetAddresses)
-			{
-				SenderAlias = senderAlias;
-				Subject = subject;
-				Content = content;
-				TargetAddresses = targetAddresses;
-				Attachments = new Dictionary<string, byte[]>();
-			}
-		}
+		private const string _invalidTokenError = "Invalid authorization token";
 
 		private static bool _isSendingEmail;
 
-		private static Queue<MailData> _pendingRedirectes = new Queue<MailData>();
+		private static Queue<AuthorizedMailData> _pendingEmails = new Queue<AuthorizedMailData>();
 
-		private static Queue<MailData> _pendingContactEmails = new Queue<MailData>();
+		#region Internal Emails (No Auth)
 
-		private static Queue<MailData> _pendingBulletinEmails = new Queue<MailData>();
+		public static ServiceActionResult SendContactEmail(EMailData mailData)
+		{
+			var authorizedMailData = new AuthorizedMailData("admin@aesob.org.tr", "yF7_y1n917Bjx320?d", mailData);
 
-		public static ServiceActionResult SendRedirectEmail(MailData mailData)
+			return SendMail(authorizedMailData);
+		}
+
+		public static ServiceActionResult SendBulletinEmail(EMailData mailData)
+		{
+            var authorizedMailData = new AuthorizedMailData("bulletin@aesob.org.tr", "!Asperox123.", mailData);
+
+            return SendMail(authorizedMailData);
+		}
+
+		#endregion
+
+		#region External Emails (Auth)
+
+		public static ServiceActionResult SendReportEmail(ExternalEMailData mailData)
+		{
+            if (!mailData.IsAuthTokenValid())
+            {
+                return ServiceActionResult.CreateFail(_invalidTokenError);
+            }
+
+            var authorizedMailData = new AuthorizedMailData("reports@aesob.org.tr", "ioVmxQe2Jm3G7ArY", mailData);
+
+            return SendMail(authorizedMailData);
+		}
+
+        public static ServiceActionResult SendRedirectEmail(ExternalEMailData mailData)
+        {
+            if (!mailData.IsAuthTokenValid())
+            {
+                return ServiceActionResult.CreateFail(_invalidTokenError);
+            }
+
+            var authorizedMailData = new AuthorizedMailData("kepredir@aesob.org.tr", "AesobKep123456", mailData);
+
+            return SendMail(authorizedMailData);
+        }
+
+        #endregion
+
+		private static ServiceActionResult SendMail(AuthorizedMailData authorizedMailData)
 		{
 			if (_isSendingEmail)
 			{
-				_pendingRedirectes.Enqueue(mailData);
-				return ServiceActionResult.CreateSuccess("Mail Service is currently busy, mail request is queued");
-			}
-			return SendMail("kepredir@aesob.org.tr", "AesobKep123456", mailData);
-		}
+				_pendingEmails.Enqueue(authorizedMailData);
+                return ServiceActionResult.CreateSuccess("Mail Service is currently busy, mail request is queued");
+            }
 
-		public static ServiceActionResult SendContactEmail(MailData mailData)
-		{
-			if (_isSendingEmail)
-			{
-				_pendingContactEmails.Enqueue(mailData);
-				return ServiceActionResult.CreateSuccess("Mail Service is currently busy, mail request is queued");
-			}
+			var senderUser = authorizedMailData.AccountEmail;
+			var senderPassword = authorizedMailData.AccountPassword;
+			var mailData = authorizedMailData.MailData;
 
-			return SendMail("admin@aesob.org.tr", "yF7_y1n917Bjx320?d", mailData);
-		}
-
-		public static ServiceActionResult SendBulletinEmail(MailData mailData)
-		{
-			if (_isSendingEmail)
-			{
-				_pendingBulletinEmails.Enqueue(mailData);
-				return ServiceActionResult.CreateSuccess("Mail Service is currently busy, mail request is queued");
-			}
-
-			return SendMail("bulletin@aesob.org.tr", "!Asperox123.", mailData);
-		}
-
-		private static ServiceActionResult SendMail(string senderUser, string senderPassword, MailData mailData)
-		{
 			string[] targetAddresses = mailData.TargetAddresses;
 
 #if DEBUG
@@ -100,10 +99,10 @@ namespace aesob.org.tr.Services
 				mailMessage.Subject = mailData.Subject;
 				mailMessage.IsBodyHtml = true;
 				mailMessage.Body = mailData.Content;
-				foreach (KeyValuePair<string, byte[]> attachment in mailData.Attachments)
+				foreach (var attachment in mailData.Attachments)
 				{
 					MemoryStream ms = new MemoryStream(attachment.Value);
-					mailMessage.Attachments.Add(new Attachment(ms, attachment.Key));
+					mailMessage.Attachments.Add(new Attachment(ms, attachment.Name));
 				}
 				SmtpClient smtpClient = new SmtpClient("srvm11.trwww.com");
 				smtpClient.Port = 587;
@@ -150,8 +149,12 @@ namespace aesob.org.tr.Services
 			finally
 			{
 				_isSendingEmail = false;
-				SendPendingEmails();
-			}
+                if (_pendingEmails.Count > 0)
+                {
+                    var mail = _pendingEmails.Dequeue();
+                    SendMail(mail);
+                }
+            }
 		}
 
 		private static async Task<ServiceActionResult> SendMailToAddresses(SmtpClient client, MailMessage message, string[] addresses)
@@ -197,25 +200,6 @@ namespace aesob.org.tr.Services
 			return ServiceActionResult.CreateFail(faultyAddressSb.ToString());
         }
 
-		private static void SendPendingEmails()
-		{
-			if (_pendingBulletinEmails.Count > 0)
-			{
-				MailData mail3 = _pendingBulletinEmails.Dequeue();
-				SendBulletinEmail(mail3);
-			}
-			else if (_pendingContactEmails.Count > 0)
-			{
-				MailData mail2 = _pendingContactEmails.Dequeue();
-				SendContactEmail(mail2);
-			}
-			else if (_pendingRedirectes.Count > 0)
-			{
-				MailData mail = _pendingRedirectes.Dequeue();
-				SendRedirectEmail(mail);
-			}
-		}
-
 		public static bool IsValidEmail(string email)
 		{
 			if (string.IsNullOrWhiteSpace(email))
@@ -237,14 +221,20 @@ namespace aesob.org.tr.Services
 			}
 		}
 
-		private static string GetFormattedAddresses(List<string> addresses)
+		private struct AuthorizedMailData
 		{
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < addresses.Count; i++)
+			public string AccountEmail { get; }
+
+			public string AccountPassword { get; }
+
+			public EMailData MailData { get; }
+
+			public AuthorizedMailData(string accountEmail, string accountPassword, EMailData mailData)
 			{
-				sb.AppendLine(addresses[i]);
+				AccountEmail = accountEmail;
+				AccountPassword = accountPassword;
+				MailData = mailData;
 			}
-			return sb.ToString();
 		}
-	}
+    }
 }

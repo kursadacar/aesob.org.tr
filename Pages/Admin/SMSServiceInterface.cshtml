@@ -1,0 +1,54 @@
+﻿@page
+@model aesob.org.tr.Pages.Admin.SMSServiceInterfaceModel
+@{
+    Layout = "~/Pages/Content/_ContentLayout.cshtml";
+}
+
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <div></div>
+    <div>Mesaj:</div>
+    <textarea id="text-area" style="width: 100% !important;"></textarea>
+    <div class="metro-button" style="width:100px;" onclick="sendMessage()">Gönder</div>
+</div>
+
+<script>
+    function sendMessage() {
+        Swal.fire({
+            title: "Emin misiniz?",
+            text: "Bu SMS, cep telefonu veritabanımızda kayıtlı olan tüm AESOB üyesi esnafımıza gönderilecektir.",
+            showDenyButton: true,
+            confirmButtonText: "Evet",
+            denyButtonText: "Hayır"
+        }).then((result) => {
+            if(result.isConfirmed){
+                sendMessageAux();
+            }
+        });
+    }
+
+    function sendMessageAux(){
+        let message_data = $("#text-area")[0].value;
+
+        $.ajax({
+            url: '@HttpContext.Request.Path' + '?handler=SendMessage',
+            type: 'get',
+            data: { message: message_data },
+            headers: {
+                "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (result) {
+                let resultType = result["result"];
+                let resultMessage = result["message"];
+
+                if (resultType == "Success") {
+                    Swal.fire('Başarılı', 'Toplu mesaj başarı ile gönderildi', 'success').then(function () {
+                        window.location.reload();
+                    });
+                }
+                else {
+                    Swal.fire('Hata', 'Toplu mesaj gönderilirken bir hata oluştu. ' + resultMessage, 'error');
+                }
+            }
+        });
+    }
+</script>

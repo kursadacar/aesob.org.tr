@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject>aesob.org.tr.Program</StartupObject>
@@ -28,6 +28,10 @@
     <Folder Include="wwwroot\htmlTemplates\" />
     <Folder Include="wwwroot\fonts\" />
     <Folder Include="wwwroot\lib\magnific-popup\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AesobWebCore\Aesob.Web.Library\Aesob.Web.Library.csproj" />
   </ItemGroup>
 
 </Project>

@@ -36,16 +36,26 @@ namespace aesob.org.tr.Services.Sms
 			{
 				ServiceActionResult.CreateFail("SMS Service is not initialized");
 			}
-			List<string> targetReceivers = SMSHelper.GetPhoneAddressesForAESOB();
-			if (targetReceivers == null || targetReceivers.Count == 0)
+
+			List<string> targetReceivers = null;
+#if DEBUG
+			targetReceivers = new List<string>()
+			{
+				"905534968861",
+			};
+#else
+			targetReceivers = SMSHelper.GetPhoneAddressesForAESOB();
+#endif
+
+            if (targetReceivers == null || targetReceivers.Count == 0)
 			{
 				return ServiceActionResult.CreateFail("No phone numbers added to SMS");
 			}
 			try
 			{
-				string messageBody = CompatibilityHelper.ReplaceTurkishChars(message);
+				//string messageBody = CompatibilityHelper.ReplaceTurkishChars(message);
 				SMSObject sms = new SMSObject(_smsUserName, _smsUserPass, _smsAlias);
-				sms.SetBody(messageBody);
+				sms.SetBody(message);
 				sms.SetBeginDate(DateTime.Now);
 				sms.SetEndDate(DateTime.Now.AddMinutes(10.0));
 				sms.AddNumbers(targetReceivers);

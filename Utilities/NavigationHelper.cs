@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using aesob.org.tr.Models;
 
 namespace aesob.org.tr.Utilities
@@ -92,6 +91,7 @@ namespace aesob.org.tr.Utilities
 					int categoryIndex = 100;
 					_adminCategory = new NavBarCategory("Admin", categoryIndex, adminBarElements, true);
 					int pageIndex = 0;
+					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/SMSServiceInterface", pageIndex++, "Toplu SMS"));
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/AesobTVEditor", pageIndex++, "Aesob TV Editor"));
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/AnlasmaEditor", pageIndex++, "Anlaşma Editor"));
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/DuyuruEditor", pageIndex++, "Duyuru Editor"));

@@ -102,36 +102,16 @@ namespace aesob.org.tr
                     }
                 }
             }
-            ViewDataDictionary viewData = ViewData;
-            ClaimsPrincipal user = User;
-            int num;
-            if (user == null)
-            {
-                num = 0;
-            }
-            else
-            {
-                IIdentity identity = user.Identity;
-                num = (identity != null ? new bool?(identity.IsAuthenticated) : null) == true ? 1 : 0;
-            }
-            viewData["HasLoggedIn"] = (byte)num != 0;
+
+            bool isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+            ViewData["HasLoggedIn"] = isLoggedIn;
+            ViewData["UserPermission"] = User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "none";
             ViewData["IsDevelopment"] = false;
 #if DEBUG
             ViewData["IsDevelopment"] = true;
 #endif
-            ClaimsPrincipal user2 = User;
-            if (user2 != null)
-            {
-                IIdentity identity2 = user2.Identity;
-                if ((identity2 != null ? new bool?(identity2.IsAuthenticated) : null) == true)
-                {
-                    goto IL_0390;
-                }
-            }
-            HttpContext.SignOutAsync().Wait();
-            goto IL_0390;
-        IL_0390:
-            if (categoryID >= 0)
+
+            if (isLoggedIn)
             {
                 try
                 {
@@ -168,9 +148,11 @@ namespace aesob.org.tr
                 CurrentCategory = default;
                 CurrentPage = default;
             }
+
             ViewData["Title"] = CurrentPage.Title;
             ViewData["CurrentCategory"] = CurrentCategory;
             ViewData["CurrentPage"] = CurrentPage;
+
             return base.Page();
         }
 
