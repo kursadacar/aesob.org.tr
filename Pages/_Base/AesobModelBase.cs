@@ -111,7 +111,7 @@ namespace aesob.org.tr
             ViewData["IsDevelopment"] = true;
 #endif
 
-            if (isLoggedIn)
+            if (categoryID >= 0)
             {
                 try
                 {
