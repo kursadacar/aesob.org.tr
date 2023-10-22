@@ -33,6 +33,7 @@
     <img class="w-100 banner-blur hidden-responsive" style="margin-top: -70px !important; margin-bottom:-30px !important;" src="~/images/front-page-banner.png" />
 
     <header class="w-100" style="position: relative; max-width: 1360px; margin: auto;">
+
         <div class="d-flex flex-row hidden-responsive flex-wrap align-items-start-responsive justify-content-center align-items-end">
             @{
                 async Task RenderCustomNav(NavigationHelper.NavBarCategory element, bool singleLink)
@@ -107,7 +108,7 @@
 
                 <div class="hidden-responsive" style="margin-top:10px;">
                     <a href="~/Index">
-                        <img id="logo-responsive" class="img-cover" type="image" style="width: 250px; cursor:pointer;" src="~/images/aesob_logo.png" />
+                        <img id="logo-responsive" class="img-cover" type="image" style="height: 85px; cursor:pointer;" src="~/images/aesob_logo.png" />
                     </a>
                 </div>
 
@@ -130,8 +131,12 @@
                 {
                     await RenderCustomNav(NavigationHelper.LoginCategory, true);
                 }
+
+                <img src="~/images/ataturk.png" style="height:75px;" />
             }
+
         </div>
+
         @* Mobile Nav-Bar *@
         <div class="show-responsive">
             <div class="d-flex flex-row flex-nowrap justify-content-between align-items-center pl-4 pr-4">
@@ -170,6 +175,7 @@
         <div class="text-black dark-mode-button hidden-responsive" id="mode-switch-button" onclick="switchMode()"><i class="fa fa-moon"></i></div>
 
     </header>
+
 
     <div class="d-flex flex-column justify-content-center align-items-start margin-20 full-width-responsive no-margin-responsive">
         @RenderBody()

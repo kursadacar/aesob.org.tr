@@ -10,27 +10,31 @@
 
 <div class="page-main-container">
 
+    @* Quick Links *@
     @{
-        <div class="d-flex flex-row flex-wrap justify-content-start align-items-center bg-aesob-dark pl-3 pb-1 pt-1 w-100">
-            @foreach (var item in NavigationHelper.NavBarElements.SelectMany(x => x.Items).Where(x => x.IsQuickLink))
-            {
-                <a class="block-link-dark font-size-20px" href="@Href("~/" + item.URL)">
+        <div class="d-flex flex-row flex-nowrap justify-content-around align-items-center bg-aesob-dark pl-3 pr-3 pb-1 pt-1 w-100">
+            <div class="d-flex flex-row flex-wrap justify-content-start align-items-center w-100" style="width:calc(100% - 120px);">
+                @foreach (var item in NavigationHelper.NavBarElements.SelectMany(x => x.Items).Where(x => x.IsQuickLink))
+                {
+                    <a class="block-link-dark font-size-20px" href="@Href("~/" + item.URL)">
+                        <div class="d-flex flex-column justify-content-start align-items-start">
+                            <div class="d-flex flex-row justify-content-start align-items-center">
+                                <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
+                                <div class="text-white" style="text-align:left; font-size:16px;">@item.Title</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+                <div class="block-link-dark font-size-20px" onclick="subscribeToEmail()">
                     <div class="d-flex flex-column justify-content-start align-items-start">
                         <div class="d-flex flex-row justify-content-start align-items-center">
                             <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
-                            <div class="text-white" style="text-align:left; font-size:16px;">@item.Title</div>
+                            <div class="text-white" style="text-align:left; font-size:16px;">E-Bülten Üyeliği</div>
                         </div>
-                    </div>
-                </a>
-            }
-            <div class="block-link-dark font-size-20px" onclick="subscribeToEmail()">
-                <div class="d-flex flex-column justify-content-start align-items-start">
-                    <div class="d-flex flex-row justify-content-start align-items-center">
-                        <i class="fas fa-file-alt text-white" style="font-size:16px; color:#252525; margin-right:7px; pointer-events:none"></i>
-                        <div class="text-white" style="text-align:left; font-size:16px;">E-Bülten Üyeliği</div>
                     </div>
                 </div>
             </div>
+            <img src="~/images/yuzuncu_yil_crop.png" style="width: 120px;" title="Cumhuriyetin 100. Yılı" />
         </div>
     }
 
