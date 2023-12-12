@@ -91,7 +91,7 @@ namespace aesob.org.tr.Services.Sms
 
 		public static List<string> GetPhoneAddressesForAESOB()
 		{
-			string connectionString = "Data Source=mssql06.trwww.com;Initial Catalog=sicil;User ID=kursad;Password=Asperox123.";
+			string connectionString = "Data Source=37.77.4.71\\SQLEXPRESS;Initial Catalog=sicil;User ID=kursad;Password=Asperox123.";
 			string sqlQuery = "SELECT CEPTEL FROM SICIL WHERE CEPTEL IS NOT NULL";
 			List<string> phoneNumbersList = new List<string>();
 			using (SqlConnection connection = new SqlConnection(connectionString))
