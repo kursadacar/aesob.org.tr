@@ -40,7 +40,7 @@ namespace aesob.org.tr
             CircularsFeed = (from x in _context.Genelgelers
                              orderby x.Eklemetarihi descending, x.Sayi descending
                              select x).Take(4).ToList();
-            Baskan = Presidents.FirstOrDefault((Baskanlar x) => x.Aktif);
+            Baskan = Presidents.FirstOrDefault((Baskanlar x) => x.Aktif) ?? new Baskanlar();
         }
 
         public IActionResult OnGet()

@@ -102,6 +102,7 @@ namespace aesob.org.tr.Utilities
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/KurulEditor", pageIndex++, "Kurul Editor"));
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/OdaEditor", pageIndex++, "Oda Editor"));
 					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/PopupEditor", pageIndex++, "Popup Editor"));
+					adminBarElements.Add(NavBarPage.CreateForUrl(_adminCategory, "~/Admin/PhoneEditor", pageIndex++, "Telefon Numarası Editor"));
 					adminBarElements.Add(NavBarPage.CreateForUrlRaw(_adminCategory, "Login?handler=Logout", pageIndex++, "Çıkış", true));
 				}
 				return _adminCategory;
