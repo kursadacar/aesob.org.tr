@@ -8,6 +8,7 @@ namespace aesob.org.tr.Services
 		public enum ActionResult
 		{
 			Success,
+			SuccessWithWarning,
 			Fail
 		}
 
@@ -35,6 +36,11 @@ namespace aesob.org.tr.Services
 		public static ServiceActionResult CreateFail(string message = null)
 		{
 			return new ServiceActionResult(ActionResult.Fail, message ?? string.Empty);
+		}
+
+		public static ServiceActionResult CreateSuccessWithWarning(string message = null)
+		{
+			return new ServiceActionResult(ActionResult.SuccessWithWarning, message ?? string.Empty);
 		}
 	}
 }

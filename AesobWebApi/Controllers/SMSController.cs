@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 using aesob.org.tr.Services;
 using aesob.org.tr.Services.Sms;
@@ -12,13 +13,13 @@ namespace AesobWebApi.Controllers
 	public class SMSController : ControllerBase
 	{
 		[HttpPost("MassSMS")]
-		public IActionResult SendMassSms([FromBody] string emailXml)
+		public async Task<IActionResult> SendMassSms([FromBody] string emailXml)
 		{
 			string decodedXml = Base64UrlEncoder.Decode(emailXml);
-			return SendSMSFromXML(decodedXml);
+			return await SendSMSFromXML(decodedXml);
 		}
 
-		private IActionResult SendSMSFromXML(string emailXml)
+		private async Task<IActionResult> SendSMSFromXML(string emailXml)
 		{
 			string content = string.Empty;
 			List<string> targetAddresses = new List<string>();
@@ -50,7 +51,7 @@ namespace AesobWebApi.Controllers
 				}
 			}
 			content = content.Replace("{aesob_newline}", "\n");
-			return SMSService.SendMassSms(content);
+			return await SMSService.SendMassSms(content);
 		}
 	}
 }

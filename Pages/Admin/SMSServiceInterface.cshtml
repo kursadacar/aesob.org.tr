@@ -41,7 +41,7 @@
                 let resultMessage = result["message"];
 
                 if (resultType == "Success") {
-                    Swal.fire('Başarılı', 'Toplu mesaj başarı ile gönderildi', 'success').then(function () {
+                    Swal.fire('Başarılı', 'Toplu mesaj başarı ile gönderildi. ' + resultMessage, 'success').then(function () {
                         window.location.reload();
                     });
                 }

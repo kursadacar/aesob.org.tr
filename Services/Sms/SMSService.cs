@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using aesob.org.tr.Models;
 using aesob.org.tr.Utilities;
 
@@ -11,37 +12,14 @@ namespace aesob.org.tr.Services.Sms
 {
 	public static class SMSService
 	{
-		private static bool _isInitialized;
-
-		private static string _smsUserName;
-
-		private static string _smsUserPass;
-
-		private static string _smsAlias;
-
-		public static void Initialize(string smsUserName, string smsUserPass, string smsAlias)
+		public static async Task<ServiceActionResult> SendMassSms(string message)
 		{
-			if (!_isInitialized)
-			{
-				_smsUserName = smsUserName;
-				_smsUserPass = smsUserPass;
-				_smsAlias = smsAlias;
-				_isInitialized = true;
-			}
-		}
-
-		public static ServiceActionResult SendMassSms(string message)
-		{
-			if (!_isInitialized)
-			{
-				ServiceActionResult.CreateFail("SMS Service is not initialized");
-			}
-
 			List<string> targetReceivers = null;
 #if DEBUG
 			targetReceivers = new List<string>()
 			{
 				"905534968861",
+				"905061795286",
 			};
 #else
 			targetReceivers = SMSHelper.GetPhoneAddressesForAESOB();
@@ -54,12 +32,12 @@ namespace aesob.org.tr.Services.Sms
 			try
 			{
 				//string messageBody = CompatibilityHelper.ReplaceTurkishChars(message);
-				SMSObject sms = new SMSObject(_smsUserName, _smsUserPass, _smsAlias);
+				SMSObject sms = new SMSObject();
 				sms.SetBody(message);
 				sms.SetBeginDate(DateTime.Now);
 				sms.SetEndDate(DateTime.Now.AddMinutes(10.0));
 				sms.AddNumbers(targetReceivers);
-				return SendSms(sms);
+				return await SendSmsAux(sms);
 			}
 			catch (Exception e)
 			{
@@ -67,12 +45,8 @@ namespace aesob.org.tr.Services.Sms
 			}
 		}
 
-		public static ServiceActionResult SendAnnouncementMessage(Genelgeler circular, params Phone[] phones)
+		public static async Task<ServiceActionResult> SendAnnouncementMessage(Genelgeler circular, params Phone[] phones)
 		{
-			if (!_isInitialized)
-			{
-				return ServiceActionResult.CreateFail("SMS Service is not initialized");
-			}
 			if (phones.Length == 0)
 			{
 				return ServiceActionResult.CreateFail("No phone numbers added to SMS");
@@ -82,24 +56,24 @@ namespace aesob.org.tr.Services.Sms
 			string messageBody = "Yeni Genelge:\"" + announcementTitle + "\": " + announcementLink + "\n -Antalya Esnaf ve Sanatkarlar Birliği Odası";
 			try
 			{
-				SMSObject sms2 = new SMSObject(_smsUserName, _smsUserPass, _smsAlias);
+				SMSObject sms2 = new SMSObject();
 				sms2.SetBody(messageBody);
 				sms2.SetBeginDate(DateTime.Now);
 				sms2.SetEndDate(DateTime.Now.AddMinutes(10.0));
 				sms2.AddNumbers(phones.Select((Phone p) => p.PhoneNumber));
-				return SendSms(sms2);
+				return await SendSmsAux(sms2);
 			}
 			catch
 			{
 				messageBody = CompatibilityHelper.ReplaceTurkishChars(messageBody);
-				SMSObject sms = new SMSObject(_smsUserName, _smsUserPass, _smsAlias);
+				SMSObject sms = new SMSObject();
 				sms.SetBody(messageBody);
 				sms.SetBeginDate(DateTime.Now);
 				sms.SetEndDate(DateTime.Now.AddMinutes(10.0));
 				sms.AddNumbers(phones.Select((Phone p) => p.PhoneNumber));
 				try
 				{
-					return SendSms(sms);
+					return await SendSmsAux(sms);
 				}
 				catch (Exception e)
 				{
@@ -108,24 +82,15 @@ namespace aesob.org.tr.Services.Sms
 			}
 		}
 
-		private static string CreateMessageSection(string message, string numbersSection, string beginDate, string endDate)
+		private static async Task<ServiceActionResult> SendSmsAux(SMSObject sms)
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.AppendLine("<Message>");
-			sb.AppendLine("<Msgbody>");
-			sb.Append(message);
-			sb.Append("</Msgbody>");
-			sb.AppendLine("</Message>");
-			sb.Append("<Numbers>" + numbersSection + "</Numbers>\n");
-			sb.Append("<SDate>" + beginDate + "</SDate>\n");
-			sb.Append("<EDate>" + endDate + "</EDate>\n");
-			return sb.ToString();
-		}
+			if(DateTime.Now.Year >= 2024)
+			{
+				return await TTMesajService.SendSms(sms);
+			}
 
-		private static ServiceActionResult SendSms(SMSObject sms)
-		{
 			string url = SMSHelper.GetURLForSMS(sms);
-			string smsContent = sms.ToString();
+			string smsContent = GetSmsXml(sms);
 			WebClient client = new WebClient();
 			MemoryStream requestStream = new MemoryStream();
 			StreamWriter streamWriter = new StreamWriter(requestStream);
@@ -154,5 +119,36 @@ namespace aesob.org.tr.Services.Sms
 				return ServiceActionResult.CreateFail("Error during sending bulk SMS: " + e.Message);
 			}
 		}
+
+		private static string GetSmsXml(SMSObject sms)
+		{
+            StringBuilder sb = new StringBuilder();
+
+#if !DEBUG
+			_numbers.Add("905534968861");
+			_numbers.Add("905306080532");
+#endif
+            string beginDateString = SMSHelper.GetFormattedDateForSMS(sms.BeginDate);
+            string endDateString = SMSHelper.GetFormattedDateForSMS(sms.EndDate);
+            List<string> formattedNumbers = SMSHelper.FormatAllNumbersForSMS(sms.Numbers);
+			var numbersString = string.Join(',', formattedNumbers);
+
+            sb.Append("<MainmsgBody>\n");
+            sb.Append("<UserName>" + "---USERNAME---" + "</UserName>\n");
+            sb.Append("<PassWord>" + "---PASSWORD---" + "</PassWord>\n");
+            sb.Append("<Version>V.2</Version>\n");
+            sb.Append("<Origin>" + "---ORIGIN---" + "</Origin>\n");
+            sb.Append("<Mesgbody>" + sms.Body + "</Mesgbody>\n");
+#if DEBUG
+            sb.Append("<Numbers>905534968861</Numbers>\n");
+#else
+			sb.Append("<Numbers>" + numbersString + "</Numbers>\n");
+#endif
+            sb.Append("<SDate>" + beginDateString + "</SDate>\n");
+            sb.Append("<EDate>" + endDateString + "</EDate>\n");
+            sb.Append("</MainmsgBody>");
+
+            return sb.ToString();
+        }
 	}
 }

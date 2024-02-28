@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading.Tasks;
 using aesob.org.tr.Models;
 using aesob.org.tr.Pages.Content.Base;
 using aesob.org.tr.Services;
@@ -185,7 +186,7 @@ namespace aesob.org.tr
             return Page();
         }
 
-        public IActionResult OnPostAddNew()
+        public async Task<IActionResult> OnPostAddNew()
         {
             try
             {
@@ -212,7 +213,16 @@ namespace aesob.org.tr
                 }
                 if (dbResult.Result == ServiceActionResult.ActionResult.Success)
                 {
-                    return ContentEntryHandler.OnContentAdded(NewItem, _context);
+                    var contentHandleResult = await ContentEntryHandler.OnContentAdded(NewItem, _context);
+
+                    if(contentHandleResult.Result == ServiceActionResult.ActionResult.Success)
+                    {
+                        return dbResult;
+                    }
+                    else
+                    {
+                        return ServiceActionResult.CreateSuccessWithWarning("");
+                    }
                 }
                 return ServiceActionResult.CreateFail("Error during adding item to database");
             }

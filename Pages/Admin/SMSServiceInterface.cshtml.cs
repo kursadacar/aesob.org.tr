@@ -2,10 +2,7 @@ using aesob.org.tr.Models;
 using aesob.org.tr.Services;
 using aesob.org.tr.Services.Sms;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using static aesob.org.tr.Pages.Content.NewsFeedModel;
-using System.Collections.Generic;
-using System;
+using System.Threading.Tasks;
 
 namespace aesob.org.tr.Pages.Admin
 {
@@ -20,9 +17,9 @@ namespace aesob.org.tr.Pages.Admin
             return Page();
         }
 
-        public ServiceActionResult OnGetSendMessage(string message)
+        public async Task<ServiceActionResult> OnGetSendMessage(string message)
         {
-            return SMSService.SendMassSms(message);
+            return await SMSService.SendMassSms(message);
         }
     }
 }

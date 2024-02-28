@@ -44,49 +44,56 @@ namespace aesob.org.tr.Services.Sms
 			return false;
 		}
 
-		public static string FormatAllNumbersForSMS(List<string> numbers)
+		public static List<string> FormatAllNumbersForSMS(IEnumerable<string> numbers)
 		{
-			StringBuilder phoneNumberBuilder = new StringBuilder();
-			for (int i = numbers.Count - 1; i >= 0; i--)
+			List<string> result = new List<string>();
+
+			var numbersList = numbers.ToList();
+
+			for (int i = numbersList.Count - 1; i >= 0; i--)
 			{
-				string phoneNumber = numbers[i];
-				phoneNumber = phoneNumber.Replace("(", "");
-				phoneNumber = phoneNumber.Replace(")", "");
-				phoneNumber = phoneNumber.Replace(" ", "");
-				phoneNumber = phoneNumber.Trim();
-				if (!string.IsNullOrEmpty(phoneNumber) && !phoneNumber.Any((char c) => !char.IsNumber(c)))
+				string rawNumber = numbersList[i];
+
+				if (!string.IsNullOrEmpty(rawNumber))
 				{
-					string formatted = GetFormattedPhoneNumberForSMS(phoneNumber);
-					if (formatted.Length == 10)
+                    var formattedNumber = GetFormattedPhoneNumberForSMS(rawNumber);
+					if(formattedNumber.Length == 12)
 					{
-						phoneNumberBuilder.Append("90");
-						phoneNumberBuilder.Append(formatted);
-						phoneNumberBuilder.Append(',');
+						result.Add(formattedNumber);
 					}
 				}
 			}
-			phoneNumberBuilder.Remove(phoneNumberBuilder.Length - 1, 1);
-			return phoneNumberBuilder.ToString();
+
+			return result;
 		}
 
 		public static string GetFormattedPhoneNumberForSMS(string number)
 		{
 			if (!string.IsNullOrEmpty(number))
 			{
-				if (number.StartsWith("+90"))
+				string newNumber = "";
+
+				for(int i = 0; i< number.Length; i++)
 				{
-					number = number.Remove(0, 3);
+					if (char.IsNumber(number[i]))
+					{
+						newNumber += number[i];
+					}
 				}
-				else if (number.StartsWith("90"))
+
+				if (newNumber.StartsWith("90"))
 				{
-					number = number.Remove(0, 2);
+                    newNumber = number.Remove(0, 2);
 				}
-				else if (number.StartsWith("0"))
+				else if (newNumber.StartsWith("0"))
 				{
-					number = number.Remove(0, 1);
+                    newNumber = newNumber.Remove(0, 1);
 				}
+
+				return "90" + newNumber;
 			}
-			return number;
+
+			return string.Empty;
 		}
 
 		public static List<string> GetPhoneAddressesForAESOB()
