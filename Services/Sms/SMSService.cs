@@ -124,10 +124,6 @@ namespace aesob.org.tr.Services.Sms
 		{
             StringBuilder sb = new StringBuilder();
 
-#if !DEBUG
-			_numbers.Add("905534968861");
-			_numbers.Add("905306080532");
-#endif
             string beginDateString = SMSHelper.GetFormattedDateForSMS(sms.BeginDate);
             string endDateString = SMSHelper.GetFormattedDateForSMS(sms.EndDate);
             List<string> formattedNumbers = SMSHelper.FormatAllNumbersForSMS(sms.Numbers);
