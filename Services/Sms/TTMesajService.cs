@@ -9,12 +9,16 @@ namespace aesob.org.tr.Services.Sms
 {
     public static class TTMesajService
     {
+        private static string _tokenUsername;
+        private static string _tokenPassword;
         private static string _username;
         private static string _password;
         private static string _alias;
         
-        public static void Initialize(string username, string password, string alias)
+        public static void Initialize(string tokenUsername, string tokenPassword, string username, string password, string alias)
         {
+            _tokenUsername = tokenUsername;
+            _tokenPassword = tokenPassword;
             _username = username;
             _password = password;
             _alias = alias;
@@ -64,8 +68,8 @@ namespace aesob.org.tr.Services.Sms
             var postData = new
             {
                 grant_type = "password",
-                username = "ttapiuser1",
-                password = "ttapiuser1123",
+                username = _tokenUsername,
+                password = _tokenPassword,
             };
 
             request.AddJsonBody(postData);

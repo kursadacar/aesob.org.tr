@@ -41,7 +41,7 @@ namespace aesob.org.tr
 				x.LoginPath = "/Login";
 			});
 			IConfigurationSection smsSection = Configuration.GetSection("SMSConfig");
-			TTMesajService.Initialize(smsSection["SmsUserName"], smsSection["SmsPassword"], smsSection["SmsAlias"]);
+			TTMesajService.Initialize(smsSection["TokenUserName"], smsSection["TokenPassword"], smsSection["SmsUserName"], smsSection["SmsPassword"], smsSection["SmsAlias"]);
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
