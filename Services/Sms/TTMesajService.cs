@@ -97,9 +97,9 @@ namespace aesob.org.tr.Services.Sms
             {
                 username = _username,
                 password = _password,
-                xml = GetOneToNXml(sms),
-                isNotification = false,
-                recipentType = "BIREYSEL",
+                XML = GetOneToNXml(sms),
+                isNotification = (bool?)null,
+                recipentType = "",
                 brandCode = "",
             };
 
@@ -117,8 +117,8 @@ namespace aesob.org.tr.Services.Sms
 
             sb.AppendLine("<SINGLE_SMS>");
             sb.AppendLine($"<ORIGIN>{_alias}</ORIGIN>");
-            sb.AppendLine("<SEND_DATE>0</SEND_DATE>");
-            sb.AppendLine("<END_DATE>0</END_DATE>");
+            sb.AppendLine($"<SEND_DATE>0</SEND_DATE>");
+            sb.AppendLine($"<END_DATE>0</END_DATE>");
             sb.AppendLine($"<MESSAGE>{sms.Body}</MESSAGE>");
 
             var formattedNumbers = SMSHelper.FormatAllNumbersForSMS(sms.Numbers);
