@@ -51,6 +51,19 @@ namespace aesob.org.tr.Services.Sms
 			{
 				return ServiceActionResult.CreateFail("No phone numbers added to SMS");
 			}
+
+			List<string> receiverNumbers;
+
+#if DEBUG
+			receiverNumbers = new List<string>()
+			{
+				"905534968861",
+				"905061795286",
+			};
+#else
+			receiverNumbers = phones.Select(p => p.PhoneNumber).ToList();
+#endif
+
 			string announcementTitle = circular.Konu;
 			string announcementLink = NavigationHelper.GetCircularLink(circular, true);
 			string messageBody = "Yeni Genelge:\"" + announcementTitle + "\": " + announcementLink + "\n -Antalya Esnaf ve Sanatkarlar Birliği Odası";
@@ -60,7 +73,7 @@ namespace aesob.org.tr.Services.Sms
 				sms2.SetBody(messageBody);
 				sms2.SetBeginDate(DateTime.Now);
 				sms2.SetEndDate(DateTime.Now.AddMinutes(10.0));
-				sms2.AddNumbers(phones.Select((Phone p) => p.PhoneNumber));
+				sms2.AddNumbers(receiverNumbers);
 				return await SendSmsAux(sms2);
 			}
 			catch
@@ -70,7 +83,7 @@ namespace aesob.org.tr.Services.Sms
 				sms.SetBody(messageBody);
 				sms.SetBeginDate(DateTime.Now);
 				sms.SetEndDate(DateTime.Now.AddMinutes(10.0));
-				sms.AddNumbers(phones.Select((Phone p) => p.PhoneNumber));
+				sms.AddNumbers(receiverNumbers);
 				try
 				{
 					return await SendSmsAux(sms);
@@ -84,40 +97,37 @@ namespace aesob.org.tr.Services.Sms
 
 		private static async Task<ServiceActionResult> SendSmsAux(SMSObject sms)
 		{
-			if(DateTime.Now.Year >= 2024)
-			{
-				return await TTMesajService.SendSms(sms);
-			}
+			return await TTMesajService.SendSms(sms);
 
-			string url = SMSHelper.GetURLForSMS(sms);
-			string smsContent = GetSmsXml(sms);
-			WebClient client = new WebClient();
-			MemoryStream requestStream = new MemoryStream();
-			StreamWriter streamWriter = new StreamWriter(requestStream);
-			streamWriter.WriteLine(smsContent);
-			streamWriter.Close();
+			//string url = SMSHelper.GetURLForSMS(sms);
+			//string smsContent = GetSmsXml(sms);
+			//WebClient client = new WebClient();
+			//MemoryStream requestStream = new MemoryStream();
+			//StreamWriter streamWriter = new StreamWriter(requestStream);
+			//streamWriter.WriteLine(smsContent);
+			//streamWriter.Close();
 
-			try
-			{
-				byte[] response = client.UploadData(url, "POST", requestStream.ToArray());
-				MemoryStream responseStream = new MemoryStream(response);
-				StreamReader streamReader = new StreamReader(responseStream);
-				string responseMessage = streamReader.ReadLine();
-				streamReader.Close();
-				if (responseMessage == null)
-				{
-					return ServiceActionResult.CreateFail("No response from SMS Server");
-				}
-				if (responseMessage.StartsWith("ERR"))
-				{
-					return ServiceActionResult.CreateFail("SMS Server returned error code: " + responseMessage);
-				}
-				return ServiceActionResult.CreateSuccess("SMS sent successfully: " + responseMessage);
-			}
-			catch (Exception e)
-			{
-				return ServiceActionResult.CreateFail("Error during sending bulk SMS: " + e.Message);
-			}
+			//try
+			//{
+			//	byte[] response = client.UploadData(url, "POST", requestStream.ToArray());
+			//	MemoryStream responseStream = new MemoryStream(response);
+			//	StreamReader streamReader = new StreamReader(responseStream);
+			//	string responseMessage = streamReader.ReadLine();
+			//	streamReader.Close();
+			//	if (responseMessage == null)
+			//	{
+			//		return ServiceActionResult.CreateFail("No response from SMS Server");
+			//	}
+			//	if (responseMessage.StartsWith("ERR"))
+			//	{
+			//		return ServiceActionResult.CreateFail("SMS Server returned error code: " + responseMessage);
+			//	}
+			//	return ServiceActionResult.CreateSuccess("SMS sent successfully: " + responseMessage);
+			//}
+			//catch (Exception e)
+			//{
+			//	return ServiceActionResult.CreateFail("Error during sending bulk SMS: " + e.Message);
+			//}
 		}
 
 		private static string GetSmsXml(SMSObject sms)
