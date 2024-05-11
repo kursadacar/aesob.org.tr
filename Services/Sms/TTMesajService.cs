@@ -117,7 +117,7 @@ namespace aesob.org.tr.Services.Sms
 
             sb.AppendLine("<SINGLE_SMS>");
             sb.AppendLine($"<ORIGIN>{_alias}</ORIGIN>");
-            sb.AppendLine($"<SEND_DATE>0</SEND_DATE>");
+            sb.AppendLine($"<SEND_DATE>{sms.BeginDate.ToString("yyyyMMddHHmm")}</SEND_DATE>");
             sb.AppendLine($"<END_DATE>0</END_DATE>");
             sb.AppendLine($"<MESSAGE>{sms.Body}</MESSAGE>");
 

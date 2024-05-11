@@ -12,7 +12,7 @@ namespace aesob.org.tr.Services.Sms
 {
 	public static class SMSService
 	{
-		public static async Task<ServiceActionResult> SendMassSms(string message)
+		public static async Task<ServiceActionResult> SendMassSms(string message, DateTime sendDate, int genderFilter = -1)
 		{
 			List<string> targetReceivers = null;
 #if DEBUG
@@ -22,10 +22,10 @@ namespace aesob.org.tr.Services.Sms
 				"905061795286",
 			};
 #else
-			targetReceivers = SMSHelper.GetPhoneAddressesForAESOB();
+			targetReceivers = SMSHelper.GetPhoneAddressesForAESOB((SMSHelper.MemberGender)genderFilter);
 #endif
 
-            if (targetReceivers == null || targetReceivers.Count == 0)
+			if (targetReceivers == null || targetReceivers.Count == 0)
 			{
 				return ServiceActionResult.CreateFail("No phone numbers added to SMS");
 			}
@@ -34,8 +34,8 @@ namespace aesob.org.tr.Services.Sms
 				//string messageBody = CompatibilityHelper.ReplaceTurkishChars(message);
 				SMSObject sms = new SMSObject();
 				sms.SetBody(message);
-				sms.SetBeginDate(DateTime.Now);
-				sms.SetEndDate(DateTime.Now.AddMinutes(10.0));
+				sms.SetBeginDate(sendDate);
+				sms.SetEndDate(sendDate.AddMinutes(10.0));
 				sms.AddNumbers(targetReceivers);
 				return await SendSmsAux(sms);
 			}

@@ -5,9 +5,19 @@
 }
 
 <div class="d-flex flex-column justify-content-center align-items-center">
-    <div></div>
+    <div class="d-flex flex-row justify-content-start align-items-center w-100">
+        <div class="font-weight-bold">Cinsiyet:</div>
+        <select class="ml-2" id="gender_selection">
+            <option value="0">Tümü</option>
+            <option value="1">Sadece Erkek</option>
+            <option value="2">Sadece Kadın</option>
+        </select>
+
+        <div class="font-weight-bold ml-4">Gönderme Tarihi:</div>
+        <input class="ml-2" id="send_date" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+    </div>
     <div>Mesaj:</div>
-    <textarea id="text-area" style="width: 100% !important;"></textarea>
+    <textarea id="message_field" style="width: 100% !important;"></textarea>
     <div class="metro-button" style="width:100px;" onclick="sendMessage()">Gönder</div>
 </div>
 
@@ -27,12 +37,22 @@
     }
 
     function sendMessageAux(){
-        let message_data = $("#text-area")[0].value;
+        let message_data = $("#message_field")[0].value;
+        let gender_selection = $("#gender_selection")[0].value;
+        let send_date = $("#send_date")[0].value;
+
+        console.log(message_data);
+        console.log(gender_selection);
+        console.log(send_date);
 
         $.ajax({
             url: '@HttpContext.Request.Path' + '?handler=SendMessage',
             type: 'get',
-            data: { message: message_data },
+            data: {
+                message: message_data,
+                genderFilter: gender_selection,
+                sendDate: send_date
+            },
             headers: {
                 "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
             },
@@ -41,7 +61,7 @@
                 let resultMessage = result["message"];
 
                 if (resultType == "Success") {
-                    Swal.fire('Başarılı', 'Toplu mesaj başarı ile gönderildi. ' + resultMessage, 'success').then(function () {
+                    Swal.fire('Başarılı', resultMessage, 'success').then(function () {
                         window.location.reload();
                     });
                 }

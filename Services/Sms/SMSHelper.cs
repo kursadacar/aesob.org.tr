@@ -8,6 +8,14 @@ namespace aesob.org.tr.Services.Sms
 {
 	public static class SMSHelper
 	{
+		public enum MemberGender
+		{
+			None = -1,
+			All = 0,
+			Male = 1,
+			Female = 2,
+		}
+
 		public static string GetFormattedDateForSMS(DateTime date)
 		{
 			Func<string, string> getTwoCharacterDate = (string dateString) => (dateString.Length == 1) ? ("0" + dateString) : dateString;
@@ -96,10 +104,29 @@ namespace aesob.org.tr.Services.Sms
 			return string.Empty;
 		}
 
-		public static List<string> GetPhoneAddressesForAESOB()
+		public static List<string> GetPhoneAddressesForAESOB(MemberGender? genderFilter)
 		{
 			string connectionString = "Data Source=37.77.4.71\\SQLEXPRESS;Initial Catalog=sicil;User ID=kursad;Password=Asperox123.";
-			string sqlQuery = "SELECT CEPTEL FROM SICIL WHERE CEPTEL IS NOT NULL";
+			//string sqlQuery = $"SELECT CEPTEL FROM SICIL WHERE CEPTEL IS NOT NULL";
+
+			string genderFilterQuery = "";
+			if(genderFilter != null && genderFilter > MemberGender.All)
+			{
+				genderFilterQuery = $"AND _sicil.CINSIYET = {((int)genderFilter).ToString()}";
+            }
+
+			string sqlQuery = $"SELECT " +
+				$"_sicil.SICILNO, " +
+				$"_sicil.ADSOYAD, " +
+				$"_sicil.CEPTEL, " +
+				$"_sicil.TCKIMLIKNO " +
+				$"FROM SICILMESLEK _sicilMeslek " +
+				$"LEFT JOIN SICIL _sicil ON _sicil.ID = _sicilMeslek.SICILID " +
+				$"WHERE (_sicilMeslek.MESLEKTERKTAR IS NULL OR _sicilMeslek.MESLEKTERKTAR = NULL) AND _sicil.CEPTEL IS NOT NULL " +
+                genderFilterQuery +
+				$"GROUP BY _sicil.SICILNO, _sicil.ADSOYAD, _sicil.CEPTEL, _sicil.TCKIMLIKNO " +
+				$"ORDER BY _sicil.SICILNO ASC ";
+
 			List<string> phoneNumbersList = new List<string>();
 			using (SqlConnection connection = new SqlConnection(connectionString))
 			{
@@ -111,7 +138,7 @@ namespace aesob.org.tr.Services.Sms
 					{
 						try
 						{
-							string phoneNumber = reader.GetString(0);
+							string phoneNumber = reader.GetString(3);
 							if (phoneNumber != null)
 							{
 								phoneNumbersList.Add(phoneNumber);
@@ -121,7 +148,8 @@ namespace aesob.org.tr.Services.Sms
 						{
 						}
 					}
-					return phoneNumbersList;
+
+					return phoneNumbersList.Distinct().ToList();
 				}
 			}
 		}

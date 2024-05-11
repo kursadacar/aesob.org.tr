@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
@@ -51,7 +52,7 @@ namespace AesobWebApi.Controllers
 				}
 			}
 			content = content.Replace("{aesob_newline}", "\n");
-			return await SMSService.SendMassSms(content);
+			return await SMSService.SendMassSms(content, DateTime.Now);
 		}
 	}
 }
