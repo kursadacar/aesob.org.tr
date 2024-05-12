@@ -14,18 +14,16 @@ namespace aesob.org.tr.Services.Sms
 	{
 		public static async Task<ServiceActionResult> SendMassSms(string message, DateTime sendDate, int genderFilter = -1)
 		{
-			List<string> targetReceivers = null;
-#if DEBUG
-			targetReceivers = new List<string>()
-			{
-				"905534968861",
-				"905061795286",
-			};
-#else
-			targetReceivers = SMSHelper.GetPhoneAddressesForAESOB((SMSHelper.MemberGender)genderFilter);
+			List<string> targetReceivers = new List<string>();
+
+#if !DEBUG
+			targetReceivers = SMSHelper.GetPhoneNumbersForAESOB((SMSHelper.MemberGender)genderFilter);
 #endif
 
-			if (targetReceivers == null || targetReceivers.Count == 0)
+			targetReceivers.Add("905534968861");
+			targetReceivers.Add("905306080532");
+
+            if (targetReceivers == null || targetReceivers.Count == 0)
 			{
 				return ServiceActionResult.CreateFail("No phone numbers added to SMS");
 			}
@@ -130,31 +128,31 @@ namespace aesob.org.tr.Services.Sms
 			//}
 		}
 
-		private static string GetSmsXml(SMSObject sms)
-		{
-            StringBuilder sb = new StringBuilder();
+//		private static string GetSmsXml(SMSObject sms)
+//		{
+//            StringBuilder sb = new StringBuilder();
 
-            string beginDateString = SMSHelper.GetFormattedDateForSMS(sms.BeginDate);
-            string endDateString = SMSHelper.GetFormattedDateForSMS(sms.EndDate);
-            List<string> formattedNumbers = SMSHelper.FormatAllNumbersForSMS(sms.Numbers);
-			var numbersString = string.Join(',', formattedNumbers);
+//            string beginDateString = SMSHelper.GetFormattedDateForSMS(sms.BeginDate);
+//            string endDateString = SMSHelper.GetFormattedDateForSMS(sms.EndDate);
+//            List<string> formattedNumbers = SMSHelper.FormatAllNumbersForSMS(sms.Numbers);
+//			var numbersString = string.Join(',', formattedNumbers);
 
-            sb.Append("<MainmsgBody>\n");
-            sb.Append("<UserName>" + "---USERNAME---" + "</UserName>\n");
-            sb.Append("<PassWord>" + "---PASSWORD---" + "</PassWord>\n");
-            sb.Append("<Version>V.2</Version>\n");
-            sb.Append("<Origin>" + "---ORIGIN---" + "</Origin>\n");
-            sb.Append("<Mesgbody>" + sms.Body + "</Mesgbody>\n");
-#if DEBUG
-            sb.Append("<Numbers>905534968861</Numbers>\n");
-#else
-			sb.Append("<Numbers>" + numbersString + "</Numbers>\n");
-#endif
-            sb.Append("<SDate>" + beginDateString + "</SDate>\n");
-            sb.Append("<EDate>" + endDateString + "</EDate>\n");
-            sb.Append("</MainmsgBody>");
+//            sb.Append("<MainmsgBody>\n");
+//            sb.Append("<UserName>" + "---USERNAME---" + "</UserName>\n");
+//            sb.Append("<PassWord>" + "---PASSWORD---" + "</PassWord>\n");
+//            sb.Append("<Version>V.2</Version>\n");
+//            sb.Append("<Origin>" + "---ORIGIN---" + "</Origin>\n");
+//            sb.Append("<Mesgbody>" + sms.Body + "</Mesgbody>\n");
+//#if DEBUG
+//            sb.Append("<Numbers>905534968861</Numbers>\n");
+//#else
+//			sb.Append("<Numbers>" + numbersString + "</Numbers>\n");
+//#endif
+//            sb.Append("<SDate>" + beginDateString + "</SDate>\n");
+//            sb.Append("<EDate>" + endDateString + "</EDate>\n");
+//            sb.Append("</MainmsgBody>");
 
-            return sb.ToString();
-        }
+//            return sb.ToString();
+//        }
 	}
 }

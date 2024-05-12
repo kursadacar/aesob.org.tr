@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace aesob.org.tr.Services
 {
-	public class ServiceActionResult : JsonResult
+	public sealed class ServiceActionResult : JsonResult
 	{
 		public enum ActionResult
 		{

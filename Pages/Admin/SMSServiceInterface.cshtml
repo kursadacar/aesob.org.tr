@@ -4,6 +4,40 @@
     Layout = "~/Pages/Content/_ContentLayout.cshtml";
 }
 
+<style>
+    .enabled{
+
+    }
+
+    #member_info_container {
+        z-index: 2;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        overflow: clip;
+        background-color: rgba(0, 0, 0, 0.3);
+        transition-duration: 0.22s;
+        display:flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items:center;
+    }
+
+        #member_info_inner_container{
+            background-color: #eaeaea;
+            width: 80vw;
+            height: 80vh;
+            overflow: scroll;
+        }
+
+    #member_info_container.enabled {
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+
 <div class="d-flex flex-column justify-content-center align-items-center">
     <div class="d-flex flex-row justify-content-start align-items-center w-100">
         <div class="font-weight-bold">Cinsiyet:</div>
@@ -16,9 +50,34 @@
         <div class="font-weight-bold ml-4">Gönderme Tarihi:</div>
         <input class="ml-2" id="send_date" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
     </div>
+
+    @*TODO_Kursad: Enable after member info pagination works*@
+@*    <div class="w-100">
+        <div class="metro-button" style="width: 20rem;" onclick="displayMemberInfo()">SMS Gönderilecek Numaraları Görüntüle</div>
+        <div id="member_info_container">
+            <div id="member_info_inner_container">
+                <div class="metro-button bg-danger" style="width:10rem" onclick="hideMemberInfo()">Kapat</div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>SicilNo</th>
+                            <th>Ad Soyad</th>
+                            <th>Cep Telefonu</th>
+                            <th>TC Kimlik Numarası</th>
+                        </tr>
+                    </thead>
+                    <tbody id="member_info_item_list">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>*@
+
     <div>Mesaj:</div>
     <textarea id="message_field" style="width: 100% !important;"></textarea>
-    <div class="metro-button" style="width:100px;" onclick="sendMessage()">Gönder</div>
+    <div class="metro-button" style="width: 100px;" onclick="sendMessage()">Gönder</div>
 </div>
 
 <script>
@@ -35,6 +94,63 @@
             }
         });
     }
+
+    function hideMemberInfo(){
+        let containerElement = document.getElementById("member_info_container");
+        containerElement.classList.remove("enabled");
+    }
+
+    //TODO_Kursad: Enable after member info pagination works
+    //function displayMemberInfo(){
+    //    let gender_selection = $("#gender_selection")[0].value;
+
+    //    console.log(gender_selection);
+
+    //    $.ajax({
+    //        url: '@HttpContext.Request.Path' + '?handler=DisplayMemberInfo',
+    //        type: 'get',
+    //        data: {
+    //            genderFilter: gender_selection,
+    //        },
+    //        headers: {
+    //            "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+    //        },
+    //        success: function (result) {
+    //            let info_container = document.getElementById("member_info_container");
+    //            let elementContainer = document.getElementById("member_info_item_list");
+
+    //            for (let i = 0; i < result.length; i++){
+    //                let memberInfo = result[i];
+
+    //                let rowElement = document.createElement("tr");
+
+    //                let numberColumn = document.createElement("td");
+    //                numberColumn.innerText = i;
+    //                rowElement.appendChild(numberColumn);
+
+    //                let sicilNoColumn = document.createElement("td");
+    //                sicilNoColumn.innerText = memberInfo["sicilNo"];
+    //                rowElement.appendChild(sicilNoColumn);
+
+    //                let nameColumn = document.createElement("td");
+    //                nameColumn.innerText = memberInfo["adSoyad"];
+    //                rowElement.appendChild(nameColumn);
+
+    //                let phoneNumberColumn = document.createElement("td");
+    //                phoneNumberColumn.innerText = memberInfo["telefonNumarasi"];
+    //                rowElement.appendChild(phoneNumberColumn);
+
+    //                let tcKimlikNoColumn = document.createElement("td");
+    //                tcKimlikNoColumn.innerText = memberInfo["tcKimlikNo"];
+    //                rowElement.appendChild(tcKimlikNoColumn);
+
+    //                elementContainer.appendChild(rowElement);
+    //            }
+
+    //            info_container.classList.add("enabled");
+    //        }
+    //    });
+    //}
 
     function sendMessageAux(){
         let message_data = $("#message_field")[0].value;

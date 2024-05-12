@@ -16,6 +16,14 @@ namespace aesob.org.tr.Services.Sms
 			Female = 2,
 		}
 
+		public struct MemberInfo
+		{
+			public int SicilNo { get; set; }
+			public string AdSoyad { get; set; }
+			public string TelefonNumarasi { get; set; }
+			public string TCKimlikNo { get; set; }
+		}
+
 		public static string GetFormattedDateForSMS(DateTime date)
 		{
 			Func<string, string> getTwoCharacterDate = (string dateString) => (dateString.Length == 1) ? ("0" + dateString) : dateString;
@@ -104,7 +112,67 @@ namespace aesob.org.tr.Services.Sms
 			return string.Empty;
 		}
 
-		public static List<string> GetPhoneAddressesForAESOB(MemberGender? genderFilter)
+		public static List<MemberInfo> GetMemberInfoForAESOB(MemberGender? genderFilter)
+		{
+            string connectionString = "Data Source=37.77.4.71\\SQLEXPRESS;Initial Catalog=sicil;User ID=kursad;Password=Asperox123.";
+            //string sqlQuery = $"SELECT CEPTEL FROM SICIL WHERE CEPTEL IS NOT NULL";
+
+            string genderFilterQuery = "";
+            if (genderFilter != null && genderFilter > MemberGender.All)
+            {
+                genderFilterQuery = $"AND _sicil.CINSIYET = {((int)genderFilter).ToString()}";
+            }
+
+            string sqlQuery = $"SELECT " +
+                $"_sicil.SICILNO, " +
+                $"_sicil.ADSOYAD, " +
+                $"_sicil.CEPTEL, " +
+                $"_sicil.TCKIMLIKNO " +
+                $"FROM SICILMESLEK _sicilMeslek " +
+                $"LEFT JOIN SICIL _sicil ON _sicil.ID = _sicilMeslek.SICILID " +
+                $"WHERE (_sicilMeslek.MESLEKTERKTAR IS NULL OR _sicilMeslek.MESLEKTERKTAR = NULL) AND _sicil.CEPTEL IS NOT NULL " +
+                genderFilterQuery +
+                $"GROUP BY _sicil.SICILNO, _sicil.ADSOYAD, _sicil.CEPTEL, _sicil.TCKIMLIKNO " +
+                $"ORDER BY _sicil.SICILNO ASC ";
+
+            List<MemberInfo> membersList = new List<MemberInfo>();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sqlQuery, connection))
+                {
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        try
+                        {
+							MemberInfo memberInfo = new MemberInfo()
+							{
+								SicilNo = reader.GetInt32(0),
+								AdSoyad = reader.GetString(1),
+								TelefonNumarasi = reader.GetString(2),
+								TCKimlikNo = reader.GetString(3),
+							};
+
+                            if (memberInfo.SicilNo >= 0
+								&& !string.IsNullOrEmpty(memberInfo.AdSoyad)
+								&& !string.IsNullOrEmpty(memberInfo.TelefonNumarasi)
+								&& !string.IsNullOrEmpty(memberInfo.TCKimlikNo))
+                            {
+                                membersList.Add(memberInfo);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+
+                    return membersList.Distinct().ToList();
+                }
+            }
+        }
+
+		public static List<string> GetPhoneNumbersForAESOB(MemberGender? genderFilter)
 		{
 			string connectionString = "Data Source=37.77.4.71\\SQLEXPRESS;Initial Catalog=sicil;User ID=kursad;Password=Asperox123.";
 			//string sqlQuery = $"SELECT CEPTEL FROM SICIL WHERE CEPTEL IS NOT NULL";
